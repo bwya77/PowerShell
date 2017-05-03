@@ -3,6 +3,14 @@
 # (or UNC to another machine) (it will create a folder using the users USERNAME to easily identify the folder content owner, unmount the 
 # profile disk and do the same with the next profile disk.
 
+#So this script will now
+# - Go through a directory of profile disks
+# - Mount the profile disk
+# - Convert the SID to Username to find the owner of the Profile Disk
+# - Create a root directory using the user's Username
+# - Copy a folder or file over to that directory
+# - Give the admin a status in the console, lettting them know which user the script is on
+
 # If you want to convert the SID to usernames you must have access to Active Directory for the AD cmdlets
 
 function get-mountedvhdDrive {            
