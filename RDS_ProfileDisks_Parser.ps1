@@ -3,7 +3,6 @@
 # (or UNC to another machine) (it will create a folder using the users USERNAME to easily identify the folder content owner, unmount the 
 # profile disk and do the same with the next profile disk.
 
-# Requires Hyper-V to be installed just for the hyper-v cmdlets (mount-vhd)
 # If you want to convert the SID to usernames you must have access to Active Directory for the AD cmdlets
 
 function get-mountedvhdDrive {            
@@ -17,29 +16,30 @@ foreach ($disk in $disks){
     }            
 }
 
-
-$UPDShare = "C:\Hyper-V\Virtual Machines\New\"
-$VHDS = "C:\Hyper-V\Virtual Machines\New\*"
-$fc = new-object -com scripting.filesystemobject
-$folder = $fc.getfolder($UPDShare)
-foreach ($i in $folder.files)
-{
-  $sid = $i.Name
-  $sid = $sid.Substring(5,$sid.Length-10)
-  if ($sid -ne "template")
-  {
-    $securityidentifier = new-object security.principal.securityidentifier $sid
-    $user = ( $securityidentifier.translate( [security.principal.ntaccount] ) ).Value
+$ExportedFiles = "D:\Export\"
+$UPDShare = "D:\Test\"
+#$VHD_root = "D:\Test\*"
+$VHDS = (get-ChildItem "$UPDShare\*" -Include *.vhdx -Recurse).Name
     ForEach ($VHD in $VHDS)
     {
-    Mount-VHD -Path $VHD
+    
+    $SID = [io.path]::GetFileNameWithoutExtension("$VHD")
+
+    $SidFinal =  $SID | %{ $_.SubString(5) }
+    $User = (Get-ADUser -identity $SIDFinal).Name
+    Write-Host "Working on $User..." -ForegroundColor Green
+
+    $VHDfull = "$UPDShare"+"$VHD"
+    Mount-DiskImage $VHDfull
     $Drives = (get-mountedvhdDrive).DeviceID
-        ForEach ($Drive in $Drives)
-        {
-        $NewDir = New-Item "C:\Test\$user" -ItemType Directory
-        Copy-Item "$Drive\Desktop" $NewDir
-        Dismount-VHD $VHD
-        }
+    $NewDir = New-Item "D:\Export\$User" -ItemType Directory -Force
+    #Telling what Item I want to copy over, here I am saying the Users Desktop folder
+    $Source = "$Drives\Desktop"
+    $Destination = "$ExportedFiles\$User"
+    #Recurse will go into each folder and copy those contents as well, folder structure is kept
+    Copy-Item $Source $Destination -Force -Recurse
+    #Dismounting the image
+    Dismount-DiskImage $VHDfull
+
     }
-  }
-}
+  
