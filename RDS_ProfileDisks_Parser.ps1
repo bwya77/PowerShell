@@ -3,6 +3,9 @@
 # (or UNC to another machine) (it will create a folder using the users USERNAME to easily identify the folder content owner, unmount the 
 # profile disk and do the same with the next profile disk.
 
+# Requires Hyper-V to be installed just for the hyper-v cmdlets (mount-vhd)
+# If you want to convert the SID to usernames you must have access to Active Directory for the AD cmdlets
+
 function get-mountedvhdDrive {            
 $disks = Get-CimInstance -ClassName Win32_DiskDrive | where Caption -eq "Microsoft Virtual Disk"            
 foreach ($disk in $disks){            
