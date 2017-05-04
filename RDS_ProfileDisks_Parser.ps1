@@ -23,10 +23,8 @@ foreach ($disk in $disks){
         }            
     }            
 }
-
-$ExportedFiles = "D:\Export\"
-$UPDShare = "D:\Test\"
-#$VHD_root = "D:\Test\*"
+#Location of the Profile Disks
+$UPDShare = "D:\Test2\"
 $VHDS = (get-ChildItem "$UPDShare\*" -Include *.vhdx -Recurse).Name
     ForEach ($VHD in $VHDS)
     {
@@ -35,19 +33,28 @@ $VHDS = (get-ChildItem "$UPDShare\*" -Include *.vhdx -Recurse).Name
 
     $SidFinal =  $SID | %{ $_.SubString(5) }
     $User = (Get-ADUser -identity $SIDFinal).Name
+    #This is creating a var of the users SamAccountName, this is so we can move the files/folders to the users new profile
+    $Username = (Get-ADUser -identity $SIDFinal).SamAccountName
     Write-Host "Working on $User..." -ForegroundColor Green
 
     $VHDfull = "$UPDShare"+"$VHD"
+    Write-Host "Mounting Profile Disk for $User..." -ForegroundColor Green
     Mount-DiskImage $VHDfull
+    Write-Host "Getting the drive letter for the mounted Profile Disk..." -ForegroundColor Green
     $Drives = (get-mountedvhdDrive).DeviceID
-    $NewDir = New-Item "D:\Export\$User" -ItemType Directory -Force
+    #Command to create a new dir to dump files to, commented out since its moving to the users new profile
+    #$NewDir = New-Item "C:\Export\$User" -ItemType Directory -Force
     #Telling what Item I want to copy over, here I am saying the Users Desktop folder
-    $Source = "$Drives\Desktop"
-    $Destination = "$ExportedFiles\$User"
+    $Source = "$Drives\Appdata\Roaming\Microsoft\Signatures"
+    $Destination = "C:\Users\$Username\AppData\Roaming\Microsoft"
     #Recurse will go into each folder and copy those contents as well, folder structure is kept
+    Write-Host "Copying over files..." -ForegroundColor Green
+    Write-Host "Source: $Source" -ForegroundColor Yellow
+    Write-Host "Destination: $Destination" -ForegroundColor Yellow
     Copy-Item $Source $Destination -Force -Recurse
     #Dismounting the image
+    Write-Host "Dismounting the Profile Disk..." -ForegroundColor Green 
     Dismount-DiskImage $VHDfull
+    Write-Host "Done!" -ForegroundColor Green
 
-    }
-  
+}
