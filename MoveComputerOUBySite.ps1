@@ -1,4 +1,4 @@
-#This script will look in the default Computer Container for computers only (not servers) and resolve their DNS name to get the local IP
+#This script will look in the default Computer Container for computers only (not servers) and resolve their DNS name to IP
 #and move the computer to an OU depending on the IP its at. .2 computers go to a sites computers OU and .1 computers go to another OU
 
 $Computers = Get-ADObject -SearchBase "CN=Computers,DC=microsoft,DC=local" -LDAPFilter '(objectClass=Computer)' | Select-Object -Expand Name
