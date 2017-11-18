@@ -11,7 +11,7 @@ Connect-MsolService -Credential $UserCredentiget-msolaccal
 $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
 get-msolImport-PSSession $Session -AllowClobber
 
-$Users = Get-MSOLUser -All | Where-Object { $_.isLicensed -eq "TRUE" -and $_.Licenses.AccountSKUID -like "*reseller-account:O365_BUSINESS_ESSENTIALS*" }
+$Users = Get-MSOLUser -All | Where-Object { $_.isLicensed -eq "TRUE" -and $_.Licenses.AccountSKUID -like "*$LicenseRemove*" }
 Foreach ($User in $Users)
 {
 	
@@ -19,11 +19,11 @@ Foreach ($User in $Users)
 		$DN = ($User).DisplayName
 		
 		#Get License AccountSkuId
-		$License = "reseller-account:O365_BUSINESS_PREMIUM"
-		
+		$License = (Get-MsolAccountSku | Where-Object { $_.AccountSkuId -like "*$LicenseAdd*" }).AccountSkuId
+	
 		#Get License AccountSkuId
-		$RemoveLicense = "reseller-account:O365_BUSINESS_ESSENTIALS"
-		
+		$RemoveLicense = (Get-MsolAccountSku | Where-Object { $_.AccountSkuId -like "*$LicenseRemove*" }).AccountSkuId
+	
 		#Add Business Essentials license to the user
 		Write-Host "Adding Business Essentials license for $DN..." -ForegroundColor White
 		Set-MsolUserLicense -UserPrincipalName $UPN -AddLicenses $License
