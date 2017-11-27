@@ -3,15 +3,15 @@ Function Get-O365LicenseReport
 	#Requires -version 3 -Modules ActiveDirectory
 <#
 .Synopsis
-    Change Bulk Users Home Drive Path in Active Directory based on /u/bradleywyatt's.
+    Gather a license report from your main Office 365 tenant or all tenants your partner manages
  
 .Description
-    Gathers all users with a home drive/directory that points to a specific server, and changes the server portion to point to a new server.
+   Gather a license report from your main Office 365 tenant or all tenants your partner manages. Export report to CSV or display the results in the shell
  
 .Examples
     Get-O365LicenseReport
     Get-O365LicenseReport -Partner $True -ExportResults "C:\Scripts\license.csv"
-    Get-O365LicenseReport -Partner $True
+	Get-O365LicenseReport -Partner $True
     Get-O365LicenseReport -Partner $True -UnusedLicenseReportOnly $True -ExportResults "C:\Scripts\function.csv"
     Get-O365LicenseReport -UnusedLicenseReportOnly $True 
 #>
