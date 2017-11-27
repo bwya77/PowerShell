@@ -11,7 +11,7 @@ Function Get-O365LicenseReport
 .Examples
     Get-O365LicenseReport
     Get-O365LicenseReport -Partner $True -ExportResults "C:\Scripts\license.csv"
-	Get-O365LicenseReport -Partner $True
+    Get-O365LicenseReport -Partner $True
     Get-O365LicenseReport -Partner $True -UnusedLicenseReportOnly $True -ExportResults "C:\Scripts\function.csv"
     Get-O365LicenseReport -UnusedLicenseReportOnly $True 
 #>
