@@ -108,7 +108,7 @@ Foreach ($User in $Users)
 			$TextLic = $Sku.Item("$LicenseItem")
 			If (!($TextLic))
 			{
-				Write-Host "Error: The Hash Table has not match for $LicenseItem for $($User.DisplayName)!" -ForegroundColor Red
+				Write-Host "Error: The Hash Table has no match for $LicenseItem for $($User.DisplayName)!" -ForegroundColor Red
 			}
 			Else
 			{
@@ -133,7 +133,7 @@ Foreach ($User in $Users)
 		$TextLic = $Sku.Item("$LicenseItem")
 		If (!($TextLic))
 		{
-			Write-Host "Error: The Hash Table has not match for $LicenseItem for $($User.DisplayName)!" -ForegroundColor Red
+			Write-Host "Error: The Hash Table has no match for $LicenseItem for $($User.DisplayName)!" -ForegroundColor Red
 		}
 		Else
 		{
