@@ -26,7 +26,7 @@
 #SMTP Host
 $SMTPHost = "smtp.office365.com"
 #Who is the e-mail from
-$FromEmail = "3pauto@3points.com"
+$FromEmail = "automation@thelazyadministrator.com"
 #Password expiry days
 $expireindays = 7
 
@@ -156,15 +156,16 @@ The new password must meet the minimum requirements set forth in our corporate p
 		b.  Lowercase letters (a-z)
 		c.  Numbers (0-9)
 		d.  Symbols (!@#$%^&*...)
-	3.	It cannot match any of your past 5 passwords.
-	4.	You cannot change your password more often than once in a 24 hour period.
+	3.	It cannot match any of your past 24 passwords.
+	4.	It cannot contain characters which match 3 or more consecutive characters of your username.
+	5.	You cannot change your password more often than once in a 24 hour period.
 
-If you have any questions please contact our Support team at support@3Points.com or call us at 708.491.0300
+If you have any questions please contact our Support team at support@thelazyadministrator.com or call us at 555.555.5555
 
 Thanks,
-3Points Support
-support@3Points.com
-708.491.0300"
+The Lazy Administrator
+support@thelazyadministrator.com
+555.555.5555"
 		Write-Host "Sending E-mail to $emailaddress..." -ForegroundColor Green
 		Try
 		{
