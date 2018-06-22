@@ -17,6 +17,8 @@ $IsLicensedUsersTable = @()
 $ContactTable = @()
 $MailUser = @()
 $ContactMailUserTable = @()
+$RoomTable = @()
+$EquipTable = @()
 
 $Sku = @{
 	"O365_BUSINESS_ESSENTIALS"			   = "Office 365 Business Essentials"
@@ -292,11 +294,13 @@ Foreach ($User in $Users)
 	$Name = $User.DisplayName
 	$UPN = $User.UserPrincipalName
 	$Licenses = ($NewObject02 | Select-Object -ExpandProperty Licenses) -join ", "
+    $Disabled = $User.BlockCredential
 	
 	$obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
 	$obj | Add-Member -MemberType NoteProperty -Name UserPrincipalName -Value $UPN
 	$obj | Add-Member -MemberType NoteProperty -Name Licenses -value $Licenses
+    $obj | Add-Member -MemberType NoteProperty -Name Disabled -value $Disabled
 	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $ProxyC
 	
 	$usertable += $obj
@@ -383,8 +387,54 @@ foreach ($MailUser in $mailUsers)
 	$ContactMailUserTable += $obj
 }
 
+$Rooms = Get-Mailbox -Filter '(RecipientTypeDetails -eq "RoomMailBox")'
+Foreach ($Room in $Rooms)
+{
+    $RoomArray = @()
 
-$tabarray = @('Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts')
+    $RoomName = $Room.DisplayName
+    $RoomPrimEmail = $Room.PrimarySmtpAddress
+    $RoomEmails = ($Room.EmailAddresses | Where-Object { $_ -cnotmatch '^SMTP' })
+    foreach ($RoomEmail in $RoomEmails)
+        {
+            $RoomEmailSplit = $RoomEmail -split ":" | Select-Object -Last 1
+            $RoomArray += $RoomEmailSplit
+        }
+    $RoomEMailsF = $RoomArray -join ", "
+
+    $obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $RoomName
+	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $RoomPrimEmail
+	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $RoomEmailsF
+	
+	$RoomTable += $obj
+}
+
+$EquipMailboxes = Get-Mailbox -Filter '(RecipientTypeDetails -eq "EquipmentMailBox")'
+Foreach ($EquipMailbox in $EquipMailboxes)
+{
+    $EquipArray = @()
+
+    $EquipName = $EquipMailbox.DisplayName
+    $EquipPrimEmail = $EquipMailbox.PrimarySmtpAddress
+    $EquipEmails = ($EquipMailbox.EmailAddresses | Where-Object { $_ -cnotmatch '^SMTP' })
+    foreach ($EquipEmail in $EquipEmails)
+        {
+            $EquipEmailSplit = $EquipEmail -split ":" | Select-Object -Last 1
+            $EquipArray += $EquipEmailSplit
+        }
+    $EquipEMailsF = $EquipArray -join ", "
+
+    $obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $EquipName
+	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $EquipPrimEmail
+	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $EquipEmailsF
+	
+	$EquipTable += $obj
+}
+
+
+$tabarray = @('Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts', 'Resources')
 
 #basic Properties 
 $PieObject2 = Get-HTMLPieChartObject
@@ -526,6 +576,14 @@ $rpt += Get-HTMLTabHeader -TabNames $tabarray
         $rpt += Get-HTMLContentClose
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Mail Users"
             $rpt += get-htmlcontentdatatable $ContactMailUserTable
+        $rpt += Get-HTMLContentClose
+    $rpt += get-htmltabcontentclose
+    $rpt += get-htmltabcontentopen -TabName $tabarray[5] -TabHeading "Office 365 Resource Mailboxes" 
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Room Mailboxes"
+            $rpt += get-htmlcontentdatatable $RoomTable
+        $rpt += Get-HTMLContentClose
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Equipment Mailboxes"
+            $rpt += get-htmlcontentdatatable $EquipTable
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
 
