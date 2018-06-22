@@ -8,6 +8,7 @@ $Table = @()
 $LicenseTable = @()
 $UserTable = @()
 $SharedMailboxTable = @()
+$GroupTypetable = @()
 
 $Sku = @{
 	"O365_BUSINESS_ESSENTIALS"			     = "Office 365 Business Essentials"
@@ -129,12 +130,33 @@ $Sku = @{
 
 #Get groups and sort in alphabetical order
 $Groups = Get-Msolgroup -All | Sort-Object DisplayName
+    $DistroCount = ($Groups | Where-Object {$_.GroupType -eq "DistributionList"}).Count
+    $obj1 = New-Object -TypeName PSObject
+	$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Distribution Group"
+	$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $DistroCount
+	
+	$GroupTypetable += $obj1
+
+    $SecurityCount = ($Groups | Where-Object {$_.GroupType -eq "Security"}).Count
+    $obj1 = New-Object -TypeName PSObject
+	$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Security Group"
+	$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $SecurityCount
+	
+	$GroupTypetable += $obj1
+
+    $SecurityMailEnabledCount = ($Groups | Where-Object {$_.GroupType -eq "MailEnabledSecurity"}).Count
+    $obj1 = New-Object -TypeName PSObject
+	$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Mail Enabled Security Group"
+	$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $SecurityMailEnabledCount
+	
+	$GroupTypetable += $obj1
+
 Foreach ($Group in $Groups)
 {
-	$Users = (Get-DistributionGroupMember -Identity $Group.DisplayName | Sort-Object DisplayName | Select-Object -ExpandProperty DisplayName) -join ", "
+	$Users = (Get-MSOLGroupMember -GroupObjectId $Group.ObjectID | Sort-Object DisplayName | Select-Object -ExpandProperty DisplayName) -join ", "
 	$GName = $Group.DisplayName
 	$Type = $Group.GroupType
-	
+	$hash = New-Object PSObject -property @{ Name = "$GName"; Type = "$Type"; Members = "$Members" }
 	
 	
 	$obj = New-Object -TypeName PSObject
@@ -165,6 +187,8 @@ Foreach ($License in $Licenses)
 	$TotalAmount = $License.Activeunits
 	$Assigned = $License.ConsumedUnits
     $Unassigned = ($TotalAmount - $Assigned)
+    If ($TotalAmount -lt 1000)
+    {
 	
 	$obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Olicense
@@ -173,6 +197,7 @@ Foreach ($License in $Licenses)
     $obj | Add-Member -MemberType NoteProperty -Name "Unassigned Licenses" -value $Unassigned
 	
 	$licensetable += $obj
+    }
 }
 
 #Get all users
@@ -252,7 +277,7 @@ Foreach ($User in $Users)
 }
 
 #Get all Shared Mailboxes
-$SharedMailboxes = Get-Recipient -Resultsize unlimited | Where-Object {$_.RecipientTypeDetails -eq "SharedMailbox"}
+$SharedMailboxes = Get-Recipient -Resultsize unlimited | where {$_.RecipientTypeDetails -eq "SharedMailbox"}
 Foreach ($SharedMailbox in $SharedMailboxes)
 {
 $ProxyA = @()
@@ -269,7 +294,7 @@ $ProxyAddresses = ($SharedMailbox | Where-Object {$_.EmailAddresses -notlike "*$
                 $ProxyB = $Null
                 }
 		    $ProxyA += $ProxyB
-			$ProxyC = $ProxyA -join ", "
+			$ProxyC = $ProxyA
 		}
 	}
 	Else
@@ -277,10 +302,12 @@ $ProxyAddresses = ($SharedMailbox | Where-Object {$_.EmailAddresses -notlike "*$
 		$ProxyC = $Null
 	}
 
+$ProxyF = ($ProxyC -join ", ").TrimEnd(", ")
+
 $obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
 	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $PrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $ProxyC
+	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $ProxyF
 	
 	$SharedMailboxTable += $obj
 
@@ -288,27 +315,115 @@ $obj = New-Object -TypeName PSObject
 
 $tabarray = @('Groups','Licenses','Users','Shared Mailboxes')
 
+#basic Properties 
+$PieObject2 = Get-HTMLPieChartObject
+$PieObject2.Title = "Office 365 Total Licenses"
+$PieObject2.Size.Height =250
+$PieObject2.Size.width =250
+$PieObject2.ChartStyle.ChartType = 'doughnut'
+
+#These file exist in the module directoy, There are 4 schemes by default
+$PieObject2.ChartStyle.ColorSchemeName = "ColorScheme4"
+#There are 8 generated schemes, randomly generated at runtime 
+$PieObject2.ChartStyle.ColorSchemeName = "Generated7"
+#you can also ask for a random scheme.  Which also happens if you have too many records for the scheme
+$PieObject2.ChartStyle.ColorSchemeName = 'Random'
+
+#Data defintion you can reference any column from name and value from the  dataset.  
+#Name and Count are the default to work with the Group function.
+$PieObject2.DataDefinition.DataNameColumnName ='Name'
+$PieObject2.DataDefinition.DataValueColumnName = 'Total Amount'
+
+#basic Properties 
+$PieObject3 = Get-HTMLPieChartObject
+$PieObject3.Title = "Office 365 Assigned Licenses"
+$PieObject3.Size.Height =250
+$PieObject3.Size.width =250
+$PieObject3.ChartStyle.ChartType = 'doughnut'
+
+#These file exist in the module directoy, There are 4 schemes by default
+$PieObject3.ChartStyle.ColorSchemeName = "ColorScheme4"
+#There are 8 generated schemes, randomly generated at runtime 
+$PieObject3.ChartStyle.ColorSchemeName = "Generated5"
+#you can also ask for a random scheme.  Which also happens if you have too many records for the scheme
+$PieObject3.ChartStyle.ColorSchemeName = 'Random'
+
+#Data defintion you can reference any column from name and value from the  dataset.  
+#Name and Count are the default to work with the Group function.
+$PieObject3.DataDefinition.DataNameColumnName ='Name'
+$PieObject3.DataDefinition.DataValueColumnName = 'Assigned Licenses'
+
+#basic Properties 
+$PieObject4 = Get-HTMLPieChartObject
+$PieObject4.Title = "Office 365 Unassigned Licenses"
+$PieObject4.Size.Height =250
+$PieObject4.Size.width =250
+$PieObject4.ChartStyle.ChartType = 'doughnut'
+
+#These file exist in the module directoy, There are 4 schemes by default
+$PieObject4.ChartStyle.ColorSchemeName = "ColorScheme4"
+#There are 8 generated schemes, randomly generated at runtime 
+$PieObject4.ChartStyle.ColorSchemeName = "Generated4"
+#you can also ask for a random scheme.  Which also happens if you have too many records for the scheme
+$PieObject4.ChartStyle.ColorSchemeName = 'Random'
+
+#Data defintion you can reference any column from name and value from the  dataset.  
+#Name and Count are the default to work with the Group function.
+$PieObject4.DataDefinition.DataNameColumnName ='Name'
+$PieObject4.DataDefinition.DataValueColumnName = 'Unassigned Licenses'
+
+#basic Properties 
+$PieObjectGroupType = Get-HTMLPieChartObject
+$PieObjectGroupType.Title = "Office 365 Groups"
+$PieObjectGroupType.Size.Height =250
+$PieObjectGroupType.Size.width =250
+$PieObjectGroupType.ChartStyle.ChartType = 'doughnut'
+
+#These file exist in the module directoy, There are 4 schemes by default
+$PieObjectGroupType.ChartStyle.ColorSchemeName = "ColorScheme4"
+#There are 8 generated schemes, randomly generated at runtime 
+$PieObjectGroupType.ChartStyle.ColorSchemeName = "Generated8"
+#you can also ask for a random scheme.  Which also happens if you have too many records for the scheme
+$PieObjectGroupType.ChartStyle.ColorSchemeName = 'Random'
+
+#Data defintion you can reference any column from name and value from the  dataset.  
+#Name and Count are the default to work with the Group function.
+$PieObjectGroupType.DataDefinition.DataNameColumnName ='Name'
+$PieObjectGroupType.DataDefinition.DataValueColumnName = 'Count'
+
 $rpt = @()
-$rpt += get-htmlopenpage -TitleText 'Office 365 Report' -LeftLogoString "http://thelazyadministrator.com/wp-content/uploads/2018/06/logo-1-e1529633626582.png"
+$rpt += get-htmlopenpage -TitleText 'Office 365 Tenant Report' -LeftLogoString "http://thelazyadministrator.com/wp-content/uploads/2018/06/logo-2-e1529684959389.png"
 
 $rpt += Get-HTMLTabHeader -TabNames $tabarray 
-    $rpt += get-htmltabcontentopen -TabName $tabarray[0] -tabheading ("Here is a report on all your groups, their group type, and their membership" )
-        $rpt += Get-HTMLContentOpen
-        $rpt += get-htmlcontentdatatable $Table
+    $rpt += get-htmltabcontentopen -TabName $tabarray[0] -TabHeading "Office 365 Groups"
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Groups"
+            $rpt += get-htmlcontentdatatable $Table
         $rpt += Get-HTMLContentClose
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Groups Chart"
+		    $rpt += Get-HTMLPieChart -ChartObject $PieObjectGroupType -DataSet $GroupTypetable
+	    $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[1] -tabheading ("Here is a report on all of your Office 365 tenant licenses" )
-        $rpt += Get-HTMLContentOpen
+    $rpt += get-htmltabcontentopen -TabName $tabarray[1]  -TabHeading "Office 365 Licenses"
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Licenses"
         $rpt += get-htmlcontentdatatable $LicenseTable
         $rpt += Get-HTMLContentClose
-    $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[2] -tabheading ("Here is a report on all of your Office 365 User objects" )
-        $rpt += Get-HTMLContentOpen
+	$rpt += Get-HTMLContentOpen -HeaderText "Office 365 Licensing Charts"
+	    $rpt += Get-HTMLColumnOpen -ColumnNumber 1 -ColumnCount 2
+	        $rpt += Get-HTMLPieChart -ChartObject $PieObject2 -DataSet $licensetable
+	    $rpt += Get-HTMLColumnClose
+	    $rpt += Get-HTMLColumnOpen -ColumnNumber 2 -ColumnCount 2
+	        $rpt += Get-HTMLPieChart -ChartObject $PieObject3 -DataSet $licensetable
+	    $rpt += Get-HTMLColumnClose
+$rpt += Get-HTMLContentclose
+$rpt += get-htmltabcontentclose
+
+    $rpt += get-htmltabcontentopen -TabName $tabarray[2] -TabHeading "Office 365 Users"
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Users"
         $rpt += get-htmlcontentdatatable $UserTable
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[3] -tabheading ("Here is a report on all of your Office 365 Shared Mailboxes" )
-        $rpt += Get-HTMLContentOpen
+    $rpt += get-htmltabcontentopen -TabName $tabarray[3] -TabHeading "Office 365 Shared Mailboxes" 
+        $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Shared Mailboxes"
         $rpt += get-htmlcontentdatatable $SharedMailboxTable
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
