@@ -1,12 +1,13 @@
 $CompanyLogo = "http://thelazyadministrator.com/wp-content/uploads/2018/06/logo-2-e1529684959389.png"
+$RightLogo = "http://thelazyadministrator.com/wp-content/uploads/2018/06/amd.png"
 $ReportSavePath = "C:\Automation\"
 
 
-#$credential = Get-Credential -Message "Please enter your Office 365 credentials"
-#Import-Module MsOnline
-#Connect-MsolService -Credential $credential
-#$exchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid/" -Credential $credential -Authentication "Basic" -AllowRedirection
-#Import-PSSession $exchangeSession -AllowClobber
+$credential = Get-Credential -Message "Please enter your Office 365 credentials"
+Import-Module MsOnline
+Connect-MsolService -Credential $credential
+$exchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid/" -Credential $credential -Authentication "Basic" -AllowRedirection
+Import-PSSession $exchangeSession -AllowClobber
 
 $Table = @()
 $LicenseTable = @()
@@ -19,6 +20,11 @@ $MailUser = @()
 $ContactMailUserTable = @()
 $RoomTable = @()
 $EquipTable = @()
+$GlobalAdminTable = @()
+$StrongPasswordTable = @()
+$CompanyInfoTable = @()
+$MessageTraceTable = @()
+$DomainTable = @()
 
 $Sku = @{
 	"O365_BUSINESS_ESSENTIALS"			   = "Office 365 Business Essentials"
@@ -137,6 +143,109 @@ $Sku = @{
 	"FLOW_P2"							   = "Microsoft Flow Plan 2"
 }
 
+#Company Information
+$CompanyInfo = Get-MsolCompanyInformation
+
+    $CompanyName = $CompanyInfo.DisplayName
+	$TechEmail = $CompanyInfo.TechnicalNotificationEmails | Out-String
+    $SelfServePassword = $CompanyInfo.SelfServePasswordResetEnabled
+    $DirSync = $CompanyInfo.DirectorySynchronizationEnabled
+    $PasswordSync = $CompanyInfo.PasswordSynchronizationEnabled
+    $LastDirSync = $CompanyInfo.LastDirSyncTime
+    $LastPasswordSync = $CompanyInfo.LastPasswordSyncTime
+    If ($DirSync -eq $False)
+    {
+        $LastDirSync = "Not Available"
+    }
+    If ($PasswordSync -eq $False)
+    {
+        $LastPasswordSync = "Not Available"
+    }
+	
+	$obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $CompanyName
+	$obj | Add-Member -MemberType NoteProperty -Name "Techcnical Email" -Value $TechEmail 
+	$obj | Add-Member -MemberType NoteProperty -Name "Self Service Password Reset" -value $SelfServePassword
+    $obj | Add-Member -MemberType NoteProperty -Name "Directory Sync" -value $DirSync
+    $obj | Add-Member -MemberType NoteProperty -Name "Password Sync" -value $PasswordSync
+    $obj | Add-Member -MemberType NoteProperty -Name "Last Directory Sync" -value $LastDirSync
+    $obj | Add-Member -MemberType NoteProperty -Name "Last Password Sync" -value $LastPasswordSync
+	
+	$CompanyInfoTable += $obj
+
+#Get Tenant Global Admins
+$role = Get-MsolRole -RoleName "Company Administrator"
+$Admins = Get-MsolRoleMember -RoleObjectId $role.ObjectId
+Foreach ($Admin in $Admins)
+{
+    $Name = $Admin.DisplayName
+	$Licensed = $Admin.IsLicensed
+    $EmailAddress = $Admin.EmailAddress
+	
+	$obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
+	$obj | Add-Member -MemberType NoteProperty -Name "Is Licensed" -value $Licensed
+    $obj | Add-Member -MemberType NoteProperty -Name "E-Mail Address" -value $EmailAddress
+	
+	$GlobalAdminTable += $obj
+}
+
+
+#Users with Strong Password Requirements disabled
+$LooseUsers = Get-Msoluser | Where-Object {$_.StrongPasswordRequired -eq $False}
+Foreach ($LooseUser in $LooseUsers)
+{
+    $NameLoose = $LooseUser.DisplayName
+	$UPNLoose = $LooseUser.UserPrincipalName
+	$LicensedLoose = $LooseUser.IsLicensed
+    $StrongPasswordLoose = $LooseUser.StrongPasswordRequired
+	
+	$obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $NameLoose
+	$obj | Add-Member -MemberType NoteProperty -Name UserPrincipalName -Value $UPNLoose
+	$obj | Add-Member -MemberType NoteProperty -Name "Is Licensed" -value $LicensedLoose
+    $obj | Add-Member -MemberType NoteProperty -Name "Strong Password Required" -value $StrongPasswordLoose
+	
+	$StrongPasswordTable += $obj
+}
+
+#Message Trace / Recent Messages
+$RecentMessages = Get-MessageTrace
+Foreach ($RecentMessage in $RecentMessages)
+{
+    $TraceDate = $RecentMessage.Received
+	$Sender = $RecentMessage.SenderAddress
+	$Recipient = $RecentMessage.RecipientAddress
+    $Subject = $RecentMessage.Subject
+    $Status = $RecentMessage.Status
+	
+	$obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name "Received Date" -Value $TraceDate
+    $obj | Add-Member -MemberType NoteProperty -Name "E-Mail Subject" -Value $Subject
+	$obj | Add-Member -MemberType NoteProperty -Name "Sender" -Value $Sender
+	$obj | Add-Member -MemberType NoteProperty -Name "Recipient" -value $Recipient
+    $obj | Add-Member -MemberType NoteProperty -Name "Status" -value $Status
+	
+	$MessageTraceTable += $obj
+}
+
+#Tenant Domain
+$Domains = Get-MSOLDomain
+foreach ($Domain in $Domains)
+{
+    $DomainName = $Domain.Name
+	$Verified = $Domain.Status
+	$DefaultStatus = $Domain.IsDefault
+
+	$obj = New-Object -TypeName PSObject
+	$obj | Add-Member -MemberType NoteProperty -Name "Domain Name" -Value $DomainName
+    $obj | Add-Member -MemberType NoteProperty -Name "Verification Status" -Value $Verified
+	$obj | Add-Member -MemberType NoteProperty -Name "Default" -Value $DefaultStatus
+
+	
+	$DomainTable += $obj
+}
+
 
 #Get groups and sort in alphabetical order
 $Groups = Get-Msolgroup -All | Sort-Object DisplayName
@@ -174,7 +283,7 @@ Foreach ($Group in $Groups)
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $GName
 	$obj | Add-Member -MemberType NoteProperty -Name Type -Value $Type
 	$obj | Add-Member -MemberType NoteProperty -Name Members -value $users
-	$obj | Add-Member -MemberType NoteProperty -Name EmailAddress -value $GEmail
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Address" -value $GEmail
 	
 	$table += $obj
 }
@@ -246,7 +355,7 @@ Foreach ($User in $Users)
 			If (!($TextLic))
 			{
 				$NewObject01 = New-Object PSObject
-				$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $UserLicense
+				$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $lic
 				$NewObject02 += $NewObject01
 			}
 			Else
@@ -265,7 +374,7 @@ Foreach ($User in $Users)
 		If (!($TextLic))
 		{
 			$NewObject01 = New-Object PSObject
-			$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $UserLicenses
+			$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $lic
 			$NewObject02 += $NewObject01
 		}
 		Else
@@ -295,19 +404,22 @@ Foreach ($User in $Users)
 	$UPN = $User.UserPrincipalName
 	$Licenses = ($NewObject02 | Select-Object -ExpandProperty Licenses) -join ", "
     $Disabled = $User.BlockCredential
-	
+    $LastLogonUser = (Get-Mailbox -Identity $User.DisplayName -ErrorAction SilentlyContinue | Get-MailboxStatistics -ErrorAction SilentlyContinue).LastLogonTime
+
+
 	$obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
 	$obj | Add-Member -MemberType NoteProperty -Name UserPrincipalName -Value $UPN
 	$obj | Add-Member -MemberType NoteProperty -Name Licenses -value $Licenses
+    $obj | Add-Member -MemberType NoteProperty -Name "Last Logon" -value $LastLogonUser
     $obj | Add-Member -MemberType NoteProperty -Name Disabled -value $Disabled
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $ProxyC
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $ProxyC
 	
 	$usertable += $obj
 }
 
 #Get all Shared Mailboxes
-$SharedMailboxes = Get-Recipient -Resultsize unlimited | Where-Object { $_.RecipientTypeDetails -eq "SharedMailbox" }
+$SharedMailboxes = Get-Recipient -Resultsize unlimited | Where-Object { $_.RecipientTypeDetails -eq "SharedMailbox" } 
 Foreach ($SharedMailbox in $SharedMailboxes)
 {
 	$ProxyA = @()
@@ -337,7 +449,7 @@ Foreach ($SharedMailbox in $SharedMailboxes)
 	$obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
 	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $PrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $ProxyF
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $ProxyF
 	
 	$SharedMailboxTable += $obj
 	
@@ -355,7 +467,7 @@ Foreach ($Contact in $Contacts)
 	
 	$objContact = New-Object -TypeName PSObject
 	$objContact | Add-Member -MemberType NoteProperty -Name Name -Value $ContactName
-	$objContact | Add-Member -MemberType NoteProperty -Name "Email Address" -Value $ContactPrimEmail
+	$objContact | Add-Member -MemberType NoteProperty -Name "E-mail Address" -Value $ContactPrimEmail
 	
 	$ContactTable += $objContact
 	
@@ -382,7 +494,7 @@ foreach ($MailUser in $mailUsers)
 	$obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $MailName
 	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $MailPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $UserEmails
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $UserEmails
 	
 	$ContactMailUserTable += $obj
 }
@@ -405,7 +517,7 @@ Foreach ($Room in $Rooms)
     $obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $RoomName
 	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $RoomPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $RoomEmailsF
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $RoomEmailsF
 	
 	$RoomTable += $obj
 }
@@ -428,13 +540,13 @@ Foreach ($EquipMailbox in $EquipMailboxes)
     $obj = New-Object -TypeName PSObject
 	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $EquipName
 	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $EquipPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "Email Addresses" -value $EquipEmailsF
+	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $EquipEmailsF
 	
 	$EquipTable += $obj
 }
 
 
-$tabarray = @('Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts', 'Resources')
+$tabarray = @('Dashboard','Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts', 'Resources')
 
 #basic Properties 
 $PieObject2 = Get-HTMLPieChartObject
@@ -533,20 +645,48 @@ $PieObjectULicense.DataDefinition.DataNameColumnName = 'Name'
 $PieObjectULicense.DataDefinition.DataValueColumnName = 'Count'
 
 $rpt = @()
-$rpt += get-htmlopenpage -TitleText 'Office 365 Tenant Report' -LeftLogoString $CompanyLogo
+$rpt += get-htmlopenpage -TitleText 'Office 365 Tenant Report' -LeftLogoString $CompanyLogo -RightLogoString $RightLogo 
 
 $rpt += Get-HTMLTabHeader -TabNames $tabarray 
-    $rpt += get-htmltabcontentopen -TabName $tabarray[0] -TabHeading "Office 365 Groups"
+    $rpt += get-htmltabcontentopen -TabName $tabarray[0] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy))
+        $rpt+= Get-HtmlContentOpen -HeaderText "Office 365 Dashboard"
+          $rpt += Get-HTMLContentOpen -HeaderText "Company Information"
+            $rpt += Get-HtmlContentTable $CompanyInfoTable 
+          $rpt += Get-HTMLContentClose
+
+	        $rpt+= get-HtmlColumn1of2
+		        $rpt+= Get-HtmlContentOpen -BackgroundShade 1 -HeaderText 'Global Administrators'
+			        $rpt+= get-htmlcontentdatatable  $GlobalAdminTable -HideFooter
+		        $rpt+= Get-HtmlContentClose
+	        $rpt+= get-htmlColumnClose
+	            $rpt+= get-htmlColumn2of2
+		            $rpt+= Get-HtmlContentOpen -HeaderText 'Users With Strong Password Enforcement Disabled'
+			            $rpt+= get-htmlcontentdatatable  $StrongPasswordTable -HideFooter
+		        $rpt+= Get-HtmlContentClose
+	        $rpt+= get-htmlColumnClose
+
+          $rpt += Get-HTMLContentOpen -HeaderText "Recent E-Mails"
+            $rpt += Get-HTMLContentDataTable $MessageTraceTable -HideFooter
+          $rpt += Get-HTMLContentClose
+
+          $rpt += Get-HTMLContentOpen -HeaderText "Domains"
+            $rpt += Get-HtmlContentTable $DomainTable 
+          $rpt += Get-HTMLContentClose
+
+        $rpt+= Get-HtmlContentClose 
+    $rpt += get-htmltabcontentclose
+
+    $rpt += get-htmltabcontentopen -TabName $tabarray[1] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy))
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Groups"
-            $rpt += get-htmlcontentdatatable $Table
+            $rpt += get-htmlcontentdatatable $Table -HideFooter
         $rpt += Get-HTMLContentClose
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Groups Chart"
 		    $rpt += Get-HTMLPieChart -ChartObject $PieObjectGroupType -DataSet $GroupTypetable
 	    $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[1]  -TabHeading "Office 365 Licenses"
+    $rpt += get-htmltabcontentopen -TabName $tabarray[2]  -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy))
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Licenses"
-            $rpt += get-htmlcontentdatatable $LicenseTable
+            $rpt += get-htmlcontentdatatable $LicenseTable -HideFooter
         $rpt += Get-HTMLContentClose
 	$rpt += Get-HTMLContentOpen -HeaderText "Office 365 Licensing Charts"
 	    $rpt += Get-HTMLColumnOpen -ColumnNumber 1 -ColumnCount 2
@@ -557,33 +697,33 @@ $rpt += Get-HTMLTabHeader -TabNames $tabarray
 	    $rpt += Get-HTMLColumnClose
     $rpt += Get-HTMLContentclose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[2] -TabHeading "Office 365 Users"
+    $rpt += get-htmltabcontentopen -TabName $tabarray[3] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy))
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Users"
-            $rpt += get-htmlcontentdatatable $UserTable
+            $rpt += get-htmlcontentdatatable $UserTable -HideFooter
         $rpt += Get-HTMLContentClose
         $rpt += Get-HTMLContentOpen -HeaderText "Licensed & Unlicensed Users Chart"
 		    $rpt += Get-HTMLPieChart -ChartObject $PieObjectULicense -DataSet $IsLicensedUsersTable
 	    $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[3] -TabHeading "Office 365 Shared Mailboxes" 
+    $rpt += get-htmltabcontentopen -TabName $tabarray[4] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy)) 
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Shared Mailboxes"
-        $rpt += get-htmlcontentdatatable $SharedMailboxTable
+        $rpt += get-htmlcontentdatatable $SharedMailboxTable -HideFooter
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-        $rpt += get-htmltabcontentopen -TabName $tabarray[4] -TabHeading "Office 365 External Contacts" 
+        $rpt += get-htmltabcontentopen -TabName $tabarray[5] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy)) 
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Contacts"
-            $rpt += get-htmlcontentdatatable $ContactTable
+            $rpt += get-htmlcontentdatatable $ContactTable -HideFooter
         $rpt += Get-HTMLContentClose
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Mail Users"
-            $rpt += get-htmlcontentdatatable $ContactMailUserTable
+            $rpt += get-htmlcontentdatatable $ContactMailUserTable -HideFooter
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
-    $rpt += get-htmltabcontentopen -TabName $tabarray[5] -TabHeading "Office 365 Resource Mailboxes" 
+    $rpt += get-htmltabcontentopen -TabName $tabarray[6] -TabHeading ("Report: " + (Get-Date -Format MM-dd-yyyy)) 
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Room Mailboxes"
-            $rpt += get-htmlcontentdatatable $RoomTable
+            $rpt += get-htmlcontentdatatable $RoomTable -HideFooter
         $rpt += Get-HTMLContentClose
         $rpt += Get-HTMLContentOpen -HeaderText "Office 365 Equipment Mailboxes"
-            $rpt += get-htmlcontentdatatable $EquipTable
+            $rpt += get-htmlcontentdatatable $EquipTable -HideFooter
         $rpt += Get-HTMLContentClose
     $rpt += get-htmltabcontentclose
 
