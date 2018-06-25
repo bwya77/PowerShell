@@ -1,8 +1,8 @@
 <#	
 	.NOTES
 	===========================================================================
-	 Updated on:   	6/25/2018 9:43 AM
-	 Created by:   	/u/TheLazyAdministrator, /u/jmn_lab	
+	 Updated on:   	6/25/2018
+	 Created by:   	/u/TheLazyAdministrator, /u/jmn_lab, /u/nothingpersonalbro	
 	===========================================================================
 
         AzureAD  Module is required
@@ -18,9 +18,6 @@
     .Link
         http://thelazyadministrator.com/2018/06/22/create-an-interactive-html-report-for-office-365-with-powershell/
 #>
-
-
-
 $CompanyLogo = "http://thelazyadministrator.com/wp-content/uploads/2018/06/logo-2-e1529684959389.png"
 $RightLogo = "http://thelazyadministrator.com/wp-content/uploads/2018/06/amd.png"
 $ReportSavePath = "C:\Automation\"
@@ -50,120 +47,120 @@ $MessageTraceTable = New-Object 'System.Collections.Generic.List[System.Object]'
 $DomainTable = New-Object 'System.Collections.Generic.List[System.Object]'
 
 $Sku = @{
-	"O365_BUSINESS_ESSENTIALS"			    = "Office 365 Business Essentials"
-	"O365_BUSINESS_PREMIUM"				    = "Office 365 Business Premium"
-	"DESKLESSPACK"						    = "Office 365 (Plan K1)"
-	"DESKLESSWOFFPACK"					    = "Office 365 (Plan K2)"
-	"LITEPACK"							    = "Office 365 (Plan P1)"
-	"EXCHANGESTANDARD"					    = "Office 365 Exchange Online Only"
-	"STANDARDPACK"						    = "Enterprise Plan E1"
-	"STANDARDWOFFPACK"					    = "Office 365 (Plan E2)"
-	"ENTERPRISEPACK"					    = "Enterprise Plan E3"
-	"ENTERPRISEPACKLRG"					    = "Enterprise Plan E3"
-	"ENTERPRISEWITHSCAL"				    = "Enterprise Plan E4"
-	"STANDARDPACK_STUDENT"				    = "Office 365 (Plan A1) for Students"
-	"STANDARDWOFFPACKPACK_STUDENT"		    = "Office 365 (Plan A2) for Students"
-	"ENTERPRISEPACK_STUDENT"			    = "Office 365 (Plan A3) for Students"
-	"ENTERPRISEWITHSCAL_STUDENT"		    = "Office 365 (Plan A4) for Students"
-	"STANDARDPACK_FACULTY"				    = "Office 365 (Plan A1) for Faculty"
-	"STANDARDWOFFPACKPACK_FACULTY"		    = "Office 365 (Plan A2) for Faculty"
-	"ENTERPRISEPACK_FACULTY"			    = "Office 365 (Plan A3) for Faculty"
-	"ENTERPRISEWITHSCAL_FACULTY"		    = "Office 365 (Plan A4) for Faculty"
-	"ENTERPRISEPACK_B_PILOT"			    = "Office 365 (Enterprise Preview)"
-	"STANDARD_B_PILOT"					    = "Office 365 (Small Business Preview)"
-	"VISIOCLIENT"						    = "Visio Pro Online"
-	"POWER_BI_ADDON"					    = "Office 365 Power BI Addon"
-	"POWER_BI_INDIVIDUAL_USE"			    = "Power BI Individual User"
-	"POWER_BI_STANDALONE"				    = "Power BI Stand Alone"
-	"POWER_BI_STANDARD"					    = "Power-BI Standard"
-	"PROJECTESSENTIALS"					    = "Project Lite"
-	"PROJECTCLIENT"						    = "Project Professional"
-	"PROJECTONLINE_PLAN_1"				    = "Project Online"
-	"PROJECTONLINE_PLAN_2"				    = "Project Online and PRO"
-	"ProjectPremium"					    = "Project Online Premium"
-	"ECAL_SERVICES"						    = "ECAL"
-	"EMS"								    = "Enterprise Mobility Suite"
-	"RIGHTSMANAGEMENT_ADHOC"			    = "Windows Azure Rights Management"
-	"MCOMEETADV"						    = "PSTN conferencing"
-	"SHAREPOINTSTORAGE"					    = "SharePoint storage"
-	"PLANNERSTANDALONE"					    = "Planner Standalone"
-	"CRMIUR"							    = "CMRIUR"
-	"BI_AZURE_P1"						    = "Power BI Reporting and Analytics"
-	"INTUNE_A"							    = "Windows Intune Plan A"
-	"PROJECTWORKMANAGEMENT"				    = "Office 365 Planner Preview"
-	"ATP_ENTERPRISE"					    = "Exchange Online Advanced Threat Protection"
-	"EQUIVIO_ANALYTICS"					    = "Office 365 Advanced eDiscovery"
-	"AAD_BASIC"							    = "Azure Active Directory Basic"
-	"RMS_S_ENTERPRISE"					    = "Azure Active Directory Rights Management"
-	"AAD_PREMIUM"						    = "Azure Active Directory Premium"
-	"MFA_PREMIUM"						    = "Azure Multi-Factor Authentication"
-	"STANDARDPACK_GOV"					    = "Microsoft Office 365 (Plan G1) for Government"
-	"STANDARDWOFFPACK_GOV"				    = "Microsoft Office 365 (Plan G2) for Government"
-	"ENTERPRISEPACK_GOV"				    = "Microsoft Office 365 (Plan G3) for Government"
-	"ENTERPRISEWITHSCAL_GOV"			    = "Microsoft Office 365 (Plan G4) for Government"
-	"DESKLESSPACK_GOV"					    = "Microsoft Office 365 (Plan K1) for Government"
-	"ESKLESSWOFFPACK_GOV"				    = "Microsoft Office 365 (Plan K2) for Government"
-	"EXCHANGESTANDARD_GOV"				    = "Microsoft Office 365 Exchange Online (Plan 1) only for Government"
-	"EXCHANGEENTERPRISE_GOV"			    = "Microsoft Office 365 Exchange Online (Plan 2) only for Government"
-	"SHAREPOINTDESKLESS_GOV"			    = "SharePoint Online Kiosk"
-	"EXCHANGE_S_DESKLESS_GOV"			    = "Exchange Kiosk"
-	"RMS_S_ENTERPRISE_GOV"				    = "Windows Azure Active Directory Rights Management"
-	"OFFICESUBSCRIPTION_GOV"			    = "Office ProPlus"
-	"MCOSTANDARD_GOV"					    = "Lync Plan 2G"
-	"SHAREPOINTWAC_GOV"					    = "Office Online for Government"
-	"SHAREPOINTENTERPRISE_GOV"			    = "SharePoint Plan 2G"
-	"EXCHANGE_S_ENTERPRISE_GOV"			    = "Exchange Plan 2G"
-	"EXCHANGE_S_ARCHIVE_ADDON_GOV"		    = "Exchange Online Archiving"
-	"EXCHANGE_S_DESKLESS"				    = "Exchange Online Kiosk"
-	"SHAREPOINTDESKLESS"				    = "SharePoint Online Kiosk"
-	"SHAREPOINTWAC"						    = "Office Online"
-	"YAMMER_ENTERPRISE"					    = "Yammer for the Starship Enterprise"
-	"EXCHANGE_L_STANDARD"				    = "Exchange Online (Plan 1)"
-	"MCOLITE"							    = "Lync Online (Plan 1)"
-	"SHAREPOINTLITE"					    = "SharePoint Online (Plan 1)"
-	"OFFICE_PRO_PLUS_SUBSCRIPTION_SMBIZ"    = "Office ProPlus"
-	"EXCHANGE_S_STANDARD_MIDMARKET"		    = "Exchange Online (Plan 1)"
-	"MCOSTANDARD_MIDMARKET"				    = "Lync Online (Plan 1)"
-	"SHAREPOINTENTERPRISE_MIDMARKET"	    = "SharePoint Online (Plan 1)"
-	"OFFICESUBSCRIPTION"				    = "Office ProPlus"
-	"YAMMER_MIDSIZE"					    = "Yammer"
-	"DYN365_ENTERPRISE_PLAN1"			    = "Dynamics 365 Customer Engagement Plan Enterprise Edition"
-	"ENTERPRISEPREMIUM_NOPSTNCONF"		    = "Enterprise E5 (without Audio Conferencing)"
-	"ENTERPRISEPREMIUM"					    = "Enterprise E5 (with Audio Conferencing)"
-	"MCOSTANDARD"						    = "Skype for Business Online Standalone Plan 2"
-	"PROJECT_MADEIRA_PREVIEW_IW_SKU"	    = "Dynamics 365 for Financials for IWs"
-	"STANDARDWOFFPACK_IW_STUDENT"		    = "Office 365 Education for Students"
-	"STANDARDWOFFPACK_IW_FACULTY"		    = "Office 365 Education for Faculty"
-	"EOP_ENTERPRISE_FACULTY"			    = "Exchange Online Protection for Faculty"
-	"EXCHANGESTANDARD_STUDENT"			    = "Exchange Online (Plan 1) for Students"
-	"OFFICESUBSCRIPTION_STUDENT"		    = "Office ProPlus Student Benefit"
-	"STANDARDWOFFPACK_FACULTY"			    = "Office 365 Education E1 for Faculty"
-	"STANDARDWOFFPACK_STUDENT"			    = "Microsoft Office 365 (Plan A2) for Students"
-	"DYN365_FINANCIALS_BUSINESS_SKU"	    = "Dynamics 365 for Financials Business Edition"
-	"DYN365_FINANCIALS_TEAM_MEMBERS_SKU"    = "Dynamics 365 for Team Members Business Edition"
-	"FLOW_FREE"							    = "Microsoft Flow Free"
-	"POWER_BI_PRO"						    = "Power BI Pro"
-	"O365_BUSINESS"						    = "Office 365 Business"
-	"DYN365_ENTERPRISE_SALES"			    = "Dynamics Office 365 Enterprise Sales"
-	"RIGHTSMANAGEMENT"					    = "Rights Management"
-	"PROJECTPROFESSIONAL"				    = "Project Professional"
-	"VISIOONLINE_PLAN1"					    = "Visio Online Plan 1"
-	"EXCHANGEENTERPRISE"				    = "Exchange Online Plan 2"
-	"DYN365_ENTERPRISE_P1_IW"			    = "Dynamics 365 P1 Trial for Information Workers"
-	"DYN365_ENTERPRISE_TEAM_MEMBERS"	    = "Dynamics 365 For Team Members Enterprise Edition"
-	"CRMSTANDARD"						    = "Microsoft Dynamics CRM Online Professional"
-	"EXCHANGEARCHIVE_ADDON"				    = "Exchange Online Archiving For Exchange Online"
-	"EXCHANGEDESKLESS"					    = "Exchange Online Kiosk"
-	"SPZA_IW"							    = "App Connect"
-	"WINDOWS_STORE"						    = "Windows Store for Business"
-	"MCOEV"								    = "Microsoft Phone System"
-	"VIDEO_INTEROP"						    = "Polycom Skype Meeting Video Interop for Skype for Business"
-	"SPE_E5"							    = "Microsoft 365 E5"
-	"SPE_E3"							    = "Microsoft 365 E3"
-	"ATA"								    = "Advanced Threat Analytics"
-	"MCOPSTN2"							    = "Domestic and International Calling Plan"
-	"FLOW_P1"							    = "Microsoft Flow Plan 1"
-	"FLOW_P2"							    = "Microsoft Flow Plan 2"
+	"O365_BUSINESS_ESSENTIALS"			     = "Office 365 Business Essentials"
+	"O365_BUSINESS_PREMIUM"				     = "Office 365 Business Premium"
+	"DESKLESSPACK"						     = "Office 365 (Plan K1)"
+	"DESKLESSWOFFPACK"					     = "Office 365 (Plan K2)"
+	"LITEPACK"							     = "Office 365 (Plan P1)"
+	"EXCHANGESTANDARD"					     = "Office 365 Exchange Online Only"
+	"STANDARDPACK"						     = "Enterprise Plan E1"
+	"STANDARDWOFFPACK"					     = "Office 365 (Plan E2)"
+	"ENTERPRISEPACK"						 = "Enterprise Plan E3"
+	"ENTERPRISEPACKLRG"					     = "Enterprise Plan E3"
+	"ENTERPRISEWITHSCAL"					 = "Enterprise Plan E4"
+	"STANDARDPACK_STUDENT"				     = "Office 365 (Plan A1) for Students"
+	"STANDARDWOFFPACKPACK_STUDENT"		     = "Office 365 (Plan A2) for Students"
+	"ENTERPRISEPACK_STUDENT"				 = "Office 365 (Plan A3) for Students"
+	"ENTERPRISEWITHSCAL_STUDENT"			 = "Office 365 (Plan A4) for Students"
+	"STANDARDPACK_FACULTY"				     = "Office 365 (Plan A1) for Faculty"
+	"STANDARDWOFFPACKPACK_FACULTY"		     = "Office 365 (Plan A2) for Faculty"
+	"ENTERPRISEPACK_FACULTY"				 = "Office 365 (Plan A3) for Faculty"
+	"ENTERPRISEWITHSCAL_FACULTY"			 = "Office 365 (Plan A4) for Faculty"
+	"ENTERPRISEPACK_B_PILOT"				 = "Office 365 (Enterprise Preview)"
+	"STANDARD_B_PILOT"					     = "Office 365 (Small Business Preview)"
+	"VISIOCLIENT"						     = "Visio Pro Online"
+	"POWER_BI_ADDON"						 = "Office 365 Power BI Addon"
+	"POWER_BI_INDIVIDUAL_USE"			     = "Power BI Individual User"
+	"POWER_BI_STANDALONE"				     = "Power BI Stand Alone"
+	"POWER_BI_STANDARD"					     = "Power-BI Standard"
+	"PROJECTESSENTIALS"					     = "Project Lite"
+	"PROJECTCLIENT"						     = "Project Professional"
+	"PROJECTONLINE_PLAN_1"				     = "Project Online"
+	"PROJECTONLINE_PLAN_2"				     = "Project Online and PRO"
+	"ProjectPremium"						 = "Project Online Premium"
+	"ECAL_SERVICES"						     = "ECAL"
+	"EMS"								     = "Enterprise Mobility Suite"
+	"RIGHTSMANAGEMENT_ADHOC"				 = "Windows Azure Rights Management"
+	"MCOMEETADV"							 = "PSTN conferencing"
+	"SHAREPOINTSTORAGE"					     = "SharePoint storage"
+	"PLANNERSTANDALONE"					     = "Planner Standalone"
+	"CRMIUR"								 = "CMRIUR"
+	"BI_AZURE_P1"						     = "Power BI Reporting and Analytics"
+	"INTUNE_A"							     = "Windows Intune Plan A"
+	"PROJECTWORKMANAGEMENT"				     = "Office 365 Planner Preview"
+	"ATP_ENTERPRISE"						 = "Exchange Online Advanced Threat Protection"
+	"EQUIVIO_ANALYTICS"					     = "Office 365 Advanced eDiscovery"
+	"AAD_BASIC"							     = "Azure Active Directory Basic"
+	"RMS_S_ENTERPRISE"					     = "Azure Active Directory Rights Management"
+	"AAD_PREMIUM"						     = "Azure Active Directory Premium"
+	"MFA_PREMIUM"						     = "Azure Multi-Factor Authentication"
+	"STANDARDPACK_GOV"					     = "Microsoft Office 365 (Plan G1) for Government"
+	"STANDARDWOFFPACK_GOV"				     = "Microsoft Office 365 (Plan G2) for Government"
+	"ENTERPRISEPACK_GOV"					 = "Microsoft Office 365 (Plan G3) for Government"
+	"ENTERPRISEWITHSCAL_GOV"				 = "Microsoft Office 365 (Plan G4) for Government"
+	"DESKLESSPACK_GOV"					     = "Microsoft Office 365 (Plan K1) for Government"
+	"ESKLESSWOFFPACK_GOV"				     = "Microsoft Office 365 (Plan K2) for Government"
+	"EXCHANGESTANDARD_GOV"				     = "Microsoft Office 365 Exchange Online (Plan 1) only for Government"
+	"EXCHANGEENTERPRISE_GOV"				 = "Microsoft Office 365 Exchange Online (Plan 2) only for Government"
+	"SHAREPOINTDESKLESS_GOV"				 = "SharePoint Online Kiosk"
+	"EXCHANGE_S_DESKLESS_GOV"			     = "Exchange Kiosk"
+	"RMS_S_ENTERPRISE_GOV"				     = "Windows Azure Active Directory Rights Management"
+	"OFFICESUBSCRIPTION_GOV"				 = "Office ProPlus"
+	"MCOSTANDARD_GOV"					     = "Lync Plan 2G"
+	"SHAREPOINTWAC_GOV"					     = "Office Online for Government"
+	"SHAREPOINTENTERPRISE_GOV"			     = "SharePoint Plan 2G"
+	"EXCHANGE_S_ENTERPRISE_GOV"			     = "Exchange Plan 2G"
+	"EXCHANGE_S_ARCHIVE_ADDON_GOV"		     = "Exchange Online Archiving"
+	"EXCHANGE_S_DESKLESS"				     = "Exchange Online Kiosk"
+	"SHAREPOINTDESKLESS"					 = "SharePoint Online Kiosk"
+	"SHAREPOINTWAC"						     = "Office Online"
+	"YAMMER_ENTERPRISE"					     = "Yammer for the Starship Enterprise"
+	"EXCHANGE_L_STANDARD"				     = "Exchange Online (Plan 1)"
+	"MCOLITE"							     = "Lync Online (Plan 1)"
+	"SHAREPOINTLITE"						 = "SharePoint Online (Plan 1)"
+	"OFFICE_PRO_PLUS_SUBSCRIPTION_SMBIZ"	 = "Office ProPlus"
+	"EXCHANGE_S_STANDARD_MIDMARKET"		     = "Exchange Online (Plan 1)"
+	"MCOSTANDARD_MIDMARKET"				     = "Lync Online (Plan 1)"
+	"SHAREPOINTENTERPRISE_MIDMARKET"		 = "SharePoint Online (Plan 1)"
+	"OFFICESUBSCRIPTION"					 = "Office ProPlus"
+	"YAMMER_MIDSIZE"						 = "Yammer"
+	"DYN365_ENTERPRISE_PLAN1"			     = "Dynamics 365 Customer Engagement Plan Enterprise Edition"
+	"ENTERPRISEPREMIUM_NOPSTNCONF"		     = "Enterprise E5 (without Audio Conferencing)"
+	"ENTERPRISEPREMIUM"					     = "Enterprise E5 (with Audio Conferencing)"
+	"MCOSTANDARD"						     = "Skype for Business Online Standalone Plan 2"
+	"PROJECT_MADEIRA_PREVIEW_IW_SKU"		 = "Dynamics 365 for Financials for IWs"
+	"STANDARDWOFFPACK_IW_STUDENT"		     = "Office 365 Education for Students"
+	"STANDARDWOFFPACK_IW_FACULTY"		     = "Office 365 Education for Faculty"
+	"EOP_ENTERPRISE_FACULTY"				 = "Exchange Online Protection for Faculty"
+	"EXCHANGESTANDARD_STUDENT"			     = "Exchange Online (Plan 1) for Students"
+	"OFFICESUBSCRIPTION_STUDENT"			 = "Office ProPlus Student Benefit"
+	"STANDARDWOFFPACK_FACULTY"			     = "Office 365 Education E1 for Faculty"
+	"STANDARDWOFFPACK_STUDENT"			     = "Microsoft Office 365 (Plan A2) for Students"
+	"DYN365_FINANCIALS_BUSINESS_SKU"		 = "Dynamics 365 for Financials Business Edition"
+	"DYN365_FINANCIALS_TEAM_MEMBERS_SKU"	 = "Dynamics 365 for Team Members Business Edition"
+	"FLOW_FREE"							     = "Microsoft Flow Free"
+	"POWER_BI_PRO"						     = "Power BI Pro"
+	"O365_BUSINESS"						     = "Office 365 Business"
+	"DYN365_ENTERPRISE_SALES"			     = "Dynamics Office 365 Enterprise Sales"
+	"RIGHTSMANAGEMENT"					     = "Rights Management"
+	"PROJECTPROFESSIONAL"				     = "Project Professional"
+	"VISIOONLINE_PLAN1"					     = "Visio Online Plan 1"
+	"EXCHANGEENTERPRISE"					 = "Exchange Online Plan 2"
+	"DYN365_ENTERPRISE_P1_IW"			     = "Dynamics 365 P1 Trial for Information Workers"
+	"DYN365_ENTERPRISE_TEAM_MEMBERS"		 = "Dynamics 365 For Team Members Enterprise Edition"
+	"CRMSTANDARD"						     = "Microsoft Dynamics CRM Online Professional"
+	"EXCHANGEARCHIVE_ADDON"				     = "Exchange Online Archiving For Exchange Online"
+	"EXCHANGEDESKLESS"					     = "Exchange Online Kiosk"
+	"SPZA_IW"							     = "App Connect"
+	"WINDOWS_STORE"						     = "Windows Store for Business"
+	"MCOEV"								     = "Microsoft Phone System"
+	"VIDEO_INTEROP"						     = "Polycom Skype Meeting Video Interop for Skype for Business"
+	"SPE_E5"								 = "Microsoft 365 E5"
+	"SPE_E3"								 = "Microsoft 365 E3"
+	"ATA"								     = "Advanced Threat Analytics"
+	"MCOPSTN2"							     = "Domestic and International Calling Plan"
+	"FLOW_P1"							     = "Microsoft Flow Plan 1"
+	"FLOW_P2"							     = "Microsoft Flow Plan 2"
 }
 # Get all users right away. Instead of doing several lookups, we will use this object to look up all the information needed.
 $AllUsers = get-azureaduser -All:$true
@@ -187,11 +184,12 @@ If ($PasswordSync -eq $Null)
 	$LastPasswordSync = "Not Available"
 }
 
-$obj = New-Object -TypeName PSObject
-$obj | Add-Member -MemberType NoteProperty -Name Name -Value $CompanyName
-$obj | Add-Member -MemberType NoteProperty -Name "Technical E-mail" -Value $TechEmail
-$obj | Add-Member -MemberType NoteProperty -Name "Directory Sync" -value $DirSync
-$obj | Add-Member -MemberType NoteProperty -Name "Last Directory Sync" -value $LastDirSync
+$obj = [PSCustomObject]@{
+	'Name'					   = $CompanyName
+	'Technical E-mail'		   = $TechEmail
+	'Directory Sync'		   = $DirSync
+	'Last Directory Sync'	   = $LastDirSync
+}
 
 $CompanyInfoTable.add($obj)
 
@@ -211,12 +209,14 @@ Foreach ($Admin in $Admins)
 		$Licensed = $False
 	}
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
-	$obj | Add-Member -MemberType NoteProperty -Name "Is Licensed" -value $Licensed
-	$obj | Add-Member -MemberType NoteProperty -Name "E-Mail Address" -value $EmailAddress
+	$obj = [PSCustomObject]@{
+		'Name'			      = $Name
+		'Is Licensed'		  = $Licensed
+		'E-Mail Address'	  = $EmailAddress
+	}
 	
 	$GlobalAdminTable.add($obj)
+	
 }
 
 
@@ -227,7 +227,7 @@ Foreach ($LooseUser in $LooseUsers)
 {
 	$NameLoose = $LooseUser.DisplayName
 	$UPNLoose = $LooseUser.UserPrincipalName
-	$StrongPasswordLoose = $LooseUser.StrongPasswordRequired
+	$StrongPasswordLoose = "False"
 	if (($LooseUser.assignedlicenses.SkuID) -ne $Null)
 	{
 		$LicensedLoose = $true
@@ -237,11 +237,13 @@ Foreach ($LooseUser in $LooseUsers)
 		$LicensedLoose = $false
 	}
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $NameLoose
-	$obj | Add-Member -MemberType NoteProperty -Name UserPrincipalName -Value $UPNLoose
-	$obj | Add-Member -MemberType NoteProperty -Name "Is Licensed" -value $LicensedLoose
-	$obj | Add-Member -MemberType NoteProperty -Name "Strong Password Required" -value $StrongPasswordLoose
+	$obj = [PSCustomObject]@{
+		'Name'						    = $NameLoose
+		'UserPrincipalName'			    = $UPNLoose
+		'Is Licensed'				    = $LicensedLoose
+		'Strong Password Required'	    = $StrongPasswordLoose
+	}
+	
 	
 	$StrongPasswordTable.add($obj)
 }
@@ -256,12 +258,13 @@ Foreach ($RecentMessage in $RecentMessages)
 	$Subject = $RecentMessage.Subject
 	$Status = $RecentMessage.Status
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name "Received Date" -Value $TraceDate
-	$obj | Add-Member -MemberType NoteProperty -Name "E-Mail Subject" -Value $Subject
-	$obj | Add-Member -MemberType NoteProperty -Name "Sender" -Value $Sender
-	$obj | Add-Member -MemberType NoteProperty -Name "Recipient" -value $Recipient
-	$obj | Add-Member -MemberType NoteProperty -Name "Status" -value $Status
+	$obj = [PSCustomObject]@{
+		'Received Date'	       = $TraceDate
+		'E-Mail Subject'	   = $Subject
+		'Sender'			   = $Sender
+		'Recipient'		       = $Recipient
+		'Status'			   = $Status
+	}
 	
 	$MessageTraceTable.add($obj)
 }
@@ -274,11 +277,11 @@ foreach ($Domain in $Domains)
 	$Verified = $Domain.IsVerified
 	$DefaultStatus = $Domain.IsDefault
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name "Domain Name" -Value $DomainName
-	$obj | Add-Member -MemberType NoteProperty -Name "Verification Status" -Value $Verified
-	$obj | Add-Member -MemberType NoteProperty -Name "Default" -Value $DefaultStatus
-	
+	$obj = [PSCustomObject]@{
+		'Domain Name'				  = $DomainName
+		'Verification Status'		  = $Verified
+		'Default'				      = $DefaultStatus
+	}
 	
 	$DomainTable.add($obj)
 }
@@ -287,23 +290,26 @@ foreach ($Domain in $Domains)
 #Get groups and sort in alphabetical order
 $Groups = Get-AzureAdGroup -All $True | Sort-Object DisplayName
 $DistroCount = ($Groups | Where-Object { $_.MailEnabled -eq $true -and $_.SecurityEnabled -eq $false }).Count
-$obj1 = New-Object -TypeName PSObject
-$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Distribution Group"
-$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $DistroCount
+$obj1 = [PSCustomObject]@{
+	'Name'					      = 'Distribution Group'
+	'Count'					      = $DistroCount
+}
 
 $GroupTypetable.add($obj1)
 
 $SecurityCount = ($Groups | Where-Object { $_.MailEnabled -eq $false -and $_.SecurityEnabled -eq $true }).Count
-$obj1 = New-Object -TypeName PSObject
-$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Security Group"
-$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $SecurityCount
+$obj1 = [PSCustomObject]@{
+	'Name'					      = 'Security Group'
+	'Count'					      = $SecurityCount
+}
 
 $GroupTypetable.add($obj1)
 
 $SecurityMailEnabledCount = ($Groups | Where-Object { $_.MailEnabled -eq $true -and $_.SecurityEnabled -eq $true }).Count
-$obj1 = New-Object -TypeName PSObject
-$obj1 | Add-Member -MemberType NoteProperty -Name Name -Value "Mail Enabled Security Group"
-$obj1 | Add-Member -MemberType NoteProperty -Name Count -Value $SecurityMailEnabledCount
+$obj1 = [PSCustomObject]@{
+	'Name'					      = 'Mail Enabled Security Group'
+	'Count'					      = $SecurityMailEnabledCount
+}
 
 $GroupTypetable.add($obj1)
 
@@ -311,9 +317,18 @@ Foreach ($Group in $Groups)
 {
 	$Type = New-Object 'System.Collections.Generic.List[System.Object]'
 	
-	if ($group.MailEnabled -eq $True -and $group.SecurityEnabled -eq $False) { $Type = "Distribution Group" }
-	if ($group.MailEnabled -eq $False -and $group.SecurityEnabled -eq $True) { $Type = "Security Group" }
-	if ($group.MailEnabled -eq $True -and $group.SecurityEnabled -eq $True) { $Type = "Mail Enabled Security Group" }
+	if ($group.MailEnabled -eq $True -and $group.SecurityEnabled -eq $False)
+	{
+		$Type = "Distribution Group"
+	}
+	if ($group.MailEnabled -eq $False -and $group.SecurityEnabled -eq $True)
+	{
+		$Type = "Security Group"
+	}
+	if ($group.MailEnabled -eq $True -and $group.SecurityEnabled -eq $True)
+	{
+		$Type = "Mail Enabled Security Group"
+	}
 	
 	$Users = (Get-AzureADGroupMember -ObjectId $Group.ObjectID | Sort-Object DisplayName | Select-Object -ExpandProperty DisplayName) -join ", "
 	$GName = $Group.DisplayName
@@ -322,11 +337,12 @@ Foreach ($Group in $Groups)
 	$GEmail = $Group.Mail
 	
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $GName
-	$obj | Add-Member -MemberType NoteProperty -Name Type -Value $Type
-	$obj | Add-Member -MemberType NoteProperty -Name Members -value $users
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Address" -value $GEmail
+	$obj = [PSCustomObject]@{
+		'Name'				   = $GName
+		'Type'				   = $Type
+		'Members'			   = $users
+		'E-mail Address'	   = $GEmail
+	}
 	
 	$table.add($obj)
 }
@@ -355,28 +371,30 @@ Foreach ($License in $Licenses)
 	#We dont want to include the free/trial licenses
 	If ($TotalAmount -lt 1000)
 	{
-		
-		$obj = New-Object -TypeName PSObject
-		$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Olicense
-		$obj | Add-Member -MemberType NoteProperty -Name "Total Amount" -Value $TotalAmount
-		$obj | Add-Member -MemberType NoteProperty -Name "Assigned Licenses" -value $Assigned
-		$obj | Add-Member -MemberType NoteProperty -Name "Unassigned Licenses" -value $Unassigned
+		$obj = [PSCustomObject]@{
+			'Name'					    = $Olicense
+			'Total Amount'			    = $TotalAmount
+			'Assigned Licenses'		    = $Assigned
+			'Unassigned Licenses'	    = $Unassigned
+		}
 		
 		$licensetable.add($obj)
 	}
 }
 
 $IsLicensed = ($AllUsers | Where-Object { $_.assignedlicenses.count -gt 0 }).Count
-$objULic = New-Object -TypeName PSObject
-$objULic | Add-Member -MemberType NoteProperty -Name Name -Value "Users Licensed"
-$objULic | Add-Member -MemberType NoteProperty -Name Count -Value $IsLicensed
+$objULic = [PSCustomObject]@{
+	'Name'	   = 'Users Licensed'
+	'Count'    = $IsLicensed
+}
 
 $IsLicensedUsersTable.add($objULic)
 
 $ISNotLicensed = ($AllUsers | Where-Object { $_.assignedlicenses.count -eq 0 }).Count
-$objULic = New-Object -TypeName PSObject
-$objULic | Add-Member -MemberType NoteProperty -Name Name -Value "Users Not Licensed"
-$objULic | Add-Member -MemberType NoteProperty -Name Count -Value $IsNotLicensed
+$objULic = [PSCustomObject]@{
+	'Name'	   = 'Users Not Licensed'
+	'Count'    = $IsNotLicensed
+}
 
 $IsLicensedUsersTable.add($objULic)
 
@@ -395,17 +413,19 @@ Foreach ($User in $AllUsers)
 			$TextLic = $Sku.Item("$lic")
 			If (!($TextLic))
 			{
-				$NewObject01 = New-Object PSObject
-				$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $lic
+				$NewObject01 = [PSCustomObject]@{
+					'Licenses'	   = $lic
+				}
 				$NewObject02.add($NewObject01)
 			}
 			Else
 			{
-				$NewObject01 = New-Object PSObject
-				$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $textlic
+				$NewObject01 = [PSCustomObject]@{
+					'Licenses'	   = $textlic
+				}
+				
 				$NewObject02.add($NewObject01)
 			}
-			
 		}
 	}
 	Elseif (($UserLicenses).count -eq 1)
@@ -414,21 +434,24 @@ Foreach ($User in $AllUsers)
 		$TextLic = $Sku.Item("$lic")
 		If (!($TextLic))
 		{
-			$NewObject01 = New-Object PSObject
-			$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $lic
+			$NewObject01 = [PSCustomObject]@{
+				'Licenses'	   = $lic
+			}
 			$NewObject02.add($NewObject01)
 		}
 		Else
 		{
-			$NewObject01 = New-Object PSObject
-			$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $textlic
+			$NewObject01 = [PSCustomObject]@{
+				'Licenses'	   = $textlic
+			}
 			$NewObject02.add($NewObject01)
 		}
 	}
 	Else
 	{
-		$NewObject01 = New-Object PSObject
-		$NewObject01 | Add-Member -MemberType NoteProperty -Name "Licenses" -Value $Null
+		$NewObject01 = [PSCustomObject]@{
+			'Licenses'	   = $Null
+		}
 		$NewObject02.add($NewObject01)
 	}
 	
@@ -452,15 +475,17 @@ Foreach ($User in $AllUsers)
 	$UPN = $User.UserPrincipalName
 	$UserLicenses = ($NewObject02 | Select-Object -ExpandProperty Licenses) -join ", "
 	$Enabled = $User.AccountEnabled
-	$LastLogonUser = (Get-Mailbox -Identity $User.DisplayName -ErrorAction SilentlyContinue | Get-MailboxStatistics -ErrorAction SilentlyContinue).LastLogonTime
+	$ResetPW = Get-User $User.DisplayName | Select-Object -ExpandProperty ResetPasswordOnNextLogon 
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
-	$obj | Add-Member -MemberType NoteProperty -Name UserPrincipalName -Value $UPN
-	$obj | Add-Member -MemberType NoteProperty -Name Licenses -value $UserLicenses
-	$obj | Add-Member -MemberType NoteProperty -Name "Last Mailbox Logon" -value $LastLogonUser
-	$obj | Add-Member -MemberType NoteProperty -Name Enabled -value $Enabled
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $ProxyC
+	$obj = [PSCustomObject]@{
+		'Name'				                   = $Name
+		'UserPrincipalName'	                   = $UPN
+		'Licenses'			                   = $UserLicenses
+		'Reset Password at Next Logon'         = $ResetPW
+		'Enabled'			                   = $Enabled
+		'E-mail Addresses'	                   = $ProxyC
+		
+	}
 	
 	$usertable.add($obj)
 }
@@ -493,10 +518,13 @@ Foreach ($SharedMailbox in $SharedMailboxes)
 	
 	$ProxyF = ($ProxyC -join ", ").TrimEnd(", ")
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $Name
-	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $PrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $ProxyF
+	$obj = [PSCustomObject]@{
+		'Name'				   = $Name
+		'Primary E-Mail'	   = $PrimEmail
+		'E-mail Addresses'	   = $ProxyF
+	}
+	
+	
 	
 	$SharedMailboxTable.add($obj)
 	
@@ -511,10 +539,10 @@ Foreach ($Contact in $Contacts)
 	$ContactName = $Contact.DisplayName
 	$ContactPrimEmail = $Contact.PrimarySmtpAddress
 	
-	
-	$objContact = New-Object -TypeName PSObject
-	$objContact | Add-Member -MemberType NoteProperty -Name Name -Value $ContactName
-	$objContact | Add-Member -MemberType NoteProperty -Name "E-mail Address" -Value $ContactPrimEmail
+	$objContact = [PSCustomObject]@{
+		'Name'			     = $ContactName
+		'E-mail Address'	 = $ContactPrimEmail
+	}
 	
 	$ContactTable.add($objContact)
 	
@@ -538,10 +566,11 @@ foreach ($MailUser in $mailUsers)
 	
 	$UserEmails = $MailArray -join ", "
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $MailName
-	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $MailPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $UserEmails
+	$obj = [PSCustomObject]@{
+		'Name'				   = $MailName
+		'Primary E-Mail'	   = $MailPrimEmail
+		'E-mail Addresses'	   = $UserEmails
+	}
 	
 	$ContactMailUserTable.add($obj)
 }
@@ -561,10 +590,12 @@ Foreach ($Room in $Rooms)
 	}
 	$RoomEMailsF = $RoomArray -join ", "
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $RoomName
-	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $RoomPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $RoomEmailsF
+	
+	$obj = [PSCustomObject]@{
+		'Name'				   = $RoomName
+		'Primary E-Mail'	   = $RoomPrimEmail
+		'E-mail Addresses'	   = $RoomEmailsF
+	}
 	
 	$RoomTable.add($obj)
 }
@@ -584,13 +615,16 @@ Foreach ($EquipMailbox in $EquipMailboxes)
 	}
 	$EquipEMailsF = $EquipArray -join ", "
 	
-	$obj = New-Object -TypeName PSObject
-	$obj | Add-Member -MemberType NoteProperty -Name Name -Value $EquipName
-	$obj | Add-Member -MemberType NoteProperty -Name "Primary E-Mail" -Value $EquipPrimEmail
-	$obj | Add-Member -MemberType NoteProperty -Name "E-mail Addresses" -value $EquipEmailsF
+	$obj = [PSCustomObject]@{
+		'Name'				   = $EquipName
+		'Primary E-Mail'	   = $EquipPrimEmail
+		'E-mail Addresses'	   = $EquipEmailsF
+	}
+	
 	
 	$EquipTable.add($obj)
 }
+
 
 $tabarray = @('Dashboard','Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts', 'Resources')
 
@@ -690,7 +724,7 @@ $PieObjectULicense.ChartStyle.ColorSchemeName = 'Random'
 $PieObjectULicense.DataDefinition.DataNameColumnName = 'Name'
 $PieObjectULicense.DataDefinition.DataValueColumnName = 'Count'
 
-$rpt = @()
+$rpt = New-Object 'System.Collections.Generic.List[System.Object]'
 $rpt += get-htmlopenpage -TitleText 'Office 365 Tenant Report' -LeftLogoString $CompanyLogo -RightLogoString $RightLogo 
 
 $rpt += Get-HTMLTabHeader -TabNames $tabarray 
