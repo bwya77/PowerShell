@@ -248,6 +248,13 @@ Foreach ($LooseUser in $LooseUsers)
 	
 	$StrongPasswordTable.add($obj)
 }
+If (($StrongPasswordTable).count -eq 0)
+{
+	$StrongPasswordTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Users were found with Strong Password Enforcement disabled'
+	}
+}
+
 
 #Message Trace / Recent Messages
 $RecentMessages = Get-MessageTrace
@@ -269,6 +276,13 @@ Foreach ($RecentMessage in $RecentMessages)
 	
 	$MessageTraceTable.add($obj)
 }
+If (($MessageTraceTable).count -eq 0)
+{
+	$MessageTraceTable = [PSCustomObject]@{
+		'Information'  = 'Information: No recent E-Mails were found'
+	}
+}
+
 
 #Tenant Domain
 $Domains = Get-AzureAdDomain
@@ -347,6 +361,13 @@ Foreach ($Group in $Groups)
 	
 	$table.add($obj)
 }
+If (($table).count -eq 0)
+{
+	$table = [PSCustomObject]@{
+		'Information'  = 'Information: No Groups were found in the tenant'
+	}
+}
+
 
 #Get all licenses
 $Licenses = Get-AzureADSubscribedSku
@@ -369,8 +390,8 @@ Foreach ($License in $Licenses)
 	$TotalAmount = $License.PrepaidUnits.enabled
 	$Assigned = $License.ConsumedUnits
 	$Unassigned = ($TotalAmount - $Assigned)
-	#We dont want to include the free/trial licenses
-	If ($TotalAmount -lt 1000)
+
+	If ($TotalAmount -ne $Null)
 	{
 		$obj = [PSCustomObject]@{
 			'Name'					    = $Olicense
@@ -382,6 +403,13 @@ Foreach ($License in $Licenses)
 		$licensetable.add($obj)
 	}
 }
+If (($licensetable).count -eq 0)
+{
+	$licensetable = [PSCustomObject]@{
+		'Information'  = 'Information: No Licenses were found in the tenant'
+	}
+}
+
 
 $IsLicensed = ($AllUsers | Where-Object { $_.assignedlicenses.count -gt 0 }).Count
 $objULic = [PSCustomObject]@{
@@ -398,6 +426,12 @@ $objULic = [PSCustomObject]@{
 }
 
 $IsLicensedUsersTable.add($objULic)
+If (($IsLicensedUsersTable).count -eq 0)
+{
+	$IsLicensedUsersTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Licenses were found in the tenant'
+	}
+}
 
 
 Foreach ($User in $AllUsers)
@@ -490,6 +524,13 @@ Foreach ($User in $AllUsers)
 	
 	$usertable.add($obj)
 }
+If (($usertable).count -eq 0)
+{
+	$usertable = [PSCustomObject]@{
+		'Information'  = 'Information: No Users were found in the tenant'
+	}
+}
+
 
 #Get all Shared Mailboxes
 $SharedMailboxes = Get-Recipient -Resultsize unlimited | Where-Object { $_.RecipientTypeDetails -eq "SharedMailbox" }
@@ -530,6 +571,13 @@ Foreach ($SharedMailbox in $SharedMailboxes)
 	$SharedMailboxTable.add($obj)
 	
 }
+If (($SharedMailboxTable).count -eq 0)
+{
+	$SharedMailboxTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Shared Mailboxes were found in the tenant'
+	}
+}
+
 
 #Get all Contacts
 $Contacts = Get-MailContact
@@ -548,6 +596,13 @@ Foreach ($Contact in $Contacts)
 	$ContactTable.add($objContact)
 	
 }
+If (($ContactTable).count -eq 0)
+{
+	$ContactTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Contacts were found in the tenant'
+	}
+}
+
 
 #Get all Mail Users
 $MailUsers = Get-MailUser
@@ -575,6 +630,12 @@ foreach ($MailUser in $mailUsers)
 	
 	$ContactMailUserTable.add($obj)
 }
+If (($ContactMailUserTable).count -eq 0)
+{
+	$ContactMailUserTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Mail Users were found in the tenant'
+	}
+}
 
 $Rooms = Get-Mailbox -Filter '(RecipientTypeDetails -eq "RoomMailBox")'
 Foreach ($Room in $Rooms)
@@ -600,6 +661,13 @@ Foreach ($Room in $Rooms)
 	
 	$RoomTable.add($obj)
 }
+If (($RoomTable).count -eq 0)
+{
+	$RoomTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Room Mailboxes were found in the tenant'
+	}
+}
+
 
 $EquipMailboxes = Get-Mailbox -Filter '(RecipientTypeDetails -eq "EquipmentMailBox")'
 Foreach ($EquipMailbox in $EquipMailboxes)
@@ -625,6 +693,13 @@ Foreach ($EquipMailbox in $EquipMailboxes)
 	
 	$EquipTable.add($obj)
 }
+If (($EquipTable).count -eq 0)
+{
+	$EquipTable = [PSCustomObject]@{
+		'Information'  = 'Information: No Equipment Mailboxes were found in the tenant'
+	}
+}
+
 
 
 $tabarray = @('Dashboard','Groups', 'Licenses', 'Users', 'Shared Mailboxes', 'Contacts', 'Resources')
@@ -742,7 +817,7 @@ $rpt += Get-HTMLTabHeader -TabNames $tabarray
 	        $rpt+= get-htmlColumnClose
 	            $rpt+= get-htmlColumn2of2
 		            $rpt+= Get-HtmlContentOpen -HeaderText 'Users With Strong Password Enforcement Disabled'
-			            $rpt+= get-htmlcontentdatatable  $StrongPasswordTable -HideFooter
+			            $rpt+= get-htmlcontentdatatable $StrongPasswordTable -HideFooter 
 		        $rpt+= Get-HtmlContentClose
 	        $rpt+= get-htmlColumnClose
 
