@@ -1,3 +1,37 @@
+<#
+.Description
+    This script was made to parse pst data from an old provider and prep it for upload to Azure Blob Storage. 
+    It cleaned up the folder structure so there was not a bunch of nested folders that housed pst files and 
+    also renamed the pst files to be the username[INT][INT].pst and saved in a folder that had the name of the
+    username. 
+
+    The folder structure looked like this:
+    E:\
+        Archive-Email
+            BWyatt152_20180310131700
+                20180310131703
+                    0
+                        0-1.pst
+                    1
+                        0-2.pst
+            BRobertson152__20180310132700
+                20180310132703
+                    0
+                        0-1.pst
+                    1
+                        0-2.pst
+                    2
+                        0-3.pst
+
+    So this script would find all of the .pst files, store them in an array and then for each pst:
+        - Grab the username by dropping everything after the underscore (ex: BWyatt152_20180310131700)
+        - Remove the trailing 152 (this would leave us with BWyatt)
+        - Create a new root folder with the name of the username (ex: E:\Archive-Email\Bwyatt\)
+        - For each PST file it would rename it (ex: 0-1.pst becomes BWyatt1.pst)
+        - Moves the new pst (BWyatt1.ps1) to the newly created folder (ex: E:\Archive-Email\Bwyatt\)
+        - Repeat for all other pst files for that user. Once its completes all pst files for the user, move to next user
+#>
+
 $LogFile = "C:\Automation\PSTChanges_Final.txt"
 
 "INFO: GETTING ALL PST FILES" | Out-File $LogFile -Append
