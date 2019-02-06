@@ -8,7 +8,12 @@
 		Website:		https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 1.0.0
+		Version: 		1.0.1
+
+		Changelog:
+		1.0.1
+			CHANGED
+				- How the function finds the MFA Module
 		===========================================================================
 
     .SYNOPSIS
@@ -103,7 +108,8 @@ function Connect-Office365
 			Write-Host "MFA login is enabled"
 			
 			Write-Host "Checking for Exchange Online MFA Module"
-			$MFAExchangeModule = ((Get-ChildItem $Env:LOCALAPPDATA\Apps\2.0\*\CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Target -First 1).Replace("CreateExoPSSession.ps1", ""))
+			#$MFAExchangeModule = ((Get-ChildItem $Env:LOCALAPPDATA\Apps\2.0\*\CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Target -First 1).Replace("CreateExoPSSession.ps1", ""))
+			$MFAExchangeModule = ((Get-ChildItem -Path $Env:LOCALAPPDATA\Apps\2.0\ -Filter CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue -Force | Select-Object -Last 1).Directory)
 			If ($null -eq $MFAExchangeModule)
 			{
 				Write-Warning "The Exchange Online MFA Module was not found!
@@ -187,7 +193,8 @@ https://docs.microsoft.com/en-us/powershell/exchange/exchange-online/connect-to-
 			Write-Host "MFA login is enabled"
 			
 			Write-Host "Checking for Exchange Online MFA Module (Required)"
-			$MFAExchangeModule = ((Get-ChildItem $Env:LOCALAPPDATA\Apps\2.0\*\CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Target -First 1).Replace("CreateExoPSSession.ps1", ""))
+			#$MFAExchangeModule = ((Get-ChildItem $Env:LOCALAPPDATA\Apps\2.0\*\CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Target -First 1).Replace("CreateExoPSSession.ps1", ""))
+			$MFAExchangeModule = ((Get-ChildItem -Path $Env:LOCALAPPDATA\Apps\2.0\ -Filter CreateExoPSSession.ps1 -Recurse -ErrorAction SilentlyContinue -Force | Select-Object -Last 1).Directory)
 			If ($null -eq $MFAExchangeModule)
 			{
 				Write-Warning "The Exchange Online MFA Module was not found!
