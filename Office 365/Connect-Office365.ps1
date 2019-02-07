@@ -225,7 +225,7 @@ https://docs.microsoft.com/en-us/powershell/exchange/exchange-online/connect-to-
 		Write-Host "Checking for AzureAD Module"
 		If ($null -eq (Get-Module -ListAvailable -Name "AzureAD"))
 		{
-			Write-Warning "SkypeOnlineConnector Module is not present!"
+			Write-Warning "AzureAD Module is not present!"
 			
 		}
 		Else
