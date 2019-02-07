@@ -57,7 +57,7 @@ function Connect-Office365
 
     .EXAMPLE
 		Description: Connect to Exchange Online and Azure AD V2 using Multi-Factor Authentication
-        C:\PS> Connect-Office365 Service Exchange, MSOnline -MFA
+        C:\PS> Connect-Office365 -Service Exchange, MSOnline -MFA
 
 	.EXAMPLE
 		Description: Connect to Teams and Skype for Business
