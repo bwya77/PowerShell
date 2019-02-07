@@ -10,7 +10,7 @@ function Connect-Office365
 		Website:	https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 	1.0.1
+		Version: 	1.0.0
 	
 		Contributors:   /u/Sheppard_Ra
 		===========================================================================
@@ -53,15 +53,15 @@ function Connect-Office365
 
     .EXAMPLE
 		Description: Connect to Exchange Online and Azure AD V1 (MSOnline)
-        C:\PS> Connect-Office365 -Exchange -MSOnline
+        C:\PS> Connect-Office365 -Service Exchange, MSOnline
 
     .EXAMPLE
 		Description: Connect to Exchange Online and Azure AD V2 using Multi-Factor Authentication
-        C:\PS> Connect-Office365 -Exchange -AzureAD -MFA
+        C:\PS> Connect-Office365 Service Exchange, MSOnline -MFA
 
 	.EXAMPLE
 		Description: Connect to Teams and Skype for Business
-        C:\PS> Connect-Office365 -Teams -SkypeForBusiness
+        C:\PS> Connect-Office365 -Service Teams, SkypeForBusiness
 	
 	.EXAMPLE
 		Description: Connect to SharePoint Online
