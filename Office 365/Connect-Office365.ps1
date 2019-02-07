@@ -10,7 +10,7 @@ function Connect-Office365
 		Website:	https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 	1.0.0
+		Version: 	1.0.2
 	
 		Contributors:   /u/Sheppard_Ra
 		===========================================================================
