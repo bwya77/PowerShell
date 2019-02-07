@@ -10,7 +10,7 @@ function Connect-Office365
 		Website:	https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 	1.0.2
+		Version: 	1.0.3
 	
 		Contributors:   /u/Sheppard_Ra
 		===========================================================================
@@ -90,6 +90,12 @@ function Connect-Office365
 	$getModuleSplat = @{
 		ListAvailable = $True
 		Verbose	      = $False
+	}
+	
+	If ($MFA -ne $True)
+	{
+		Write-Verbose "Gathering PSCredentials object for non MFA sign on"
+		$Credential = Get-Credential -Message "Please enter your Office 365 credentials"
 	}
 	
 	ForEach ($Item in $PSBoundParameters.Service)
