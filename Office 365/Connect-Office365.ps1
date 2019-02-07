@@ -10,9 +10,13 @@ function Connect-Office365
 		Website:	https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 	1.0.3
+		Version: 	1.0.4
 	
 		Contributors:   /u/Sheppard_Ra
+	
+		Changelog:
+			1.0.4
+				- Host title will add a service or services you are connected to. If unable to connect it will not display connection status until connection is valid
 		===========================================================================
 
     .SYNOPSIS
@@ -113,11 +117,34 @@ function Connect-Office365
 				{
 					If ($MFA -eq $True)
 					{
-						Connect-AzureAD
+						$Connect = Connect-AzureAD
+						If ($Connect -ne $Null)
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: AzureAD"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - AzureAD"
+							}
+						}
+						
 					}
 					Else
 					{
-						Connect-AzureAD -Credential $Credential
+						$Connect = Connect-AzureAD -Credential $Credential
+						If ($Connect -ne $Null)
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: AzureAD"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - AzureAD"
+							}
+						}
 					}
 				}
 				continue
@@ -147,6 +174,17 @@ function Connect-Office365
 						
 						Write-Verbose "Connecting to Exchange Online"
 						Connect-EXOPSSession
+						If ($Null -ne (Get-PSSession | Where-Object { $_.ConfigurationName -like "*Exchange*" }))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Exchange"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Exchange"
+							}
+						}
 					}
 				}
 				Else
@@ -161,6 +199,18 @@ function Connect-Office365
 					$Session = New-PSSession @newPSSessionSplat
 					Write-Verbose "Connecting to Exchange Online"
 					Import-PSSession $Session -AllowClobber
+					If ($Null -ne (Get-PSSession | Where-Object { $_.ConfigurationName -like "*Exchange*" }))
+					{
+						If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+						{
+							$host.ui.RawUI.WindowTitle += " - Connected To: Exchange"
+						}
+						Else
+						{
+							$host.ui.RawUI.WindowTitle += " - Exchange"
+						}
+					}
+					
 				}
 				continue
 			}
@@ -177,10 +227,32 @@ function Connect-Office365
 					If ($MFA -eq $True)
 					{
 						Connect-MsolService
+						If ($Null -ne (Get-MsolCompanyInformation -ErrorAction SilentlyContinue))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: MSOnline"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - MSOnline"
+							}
+						}
 					}
 					Else
 					{
 						Connect-MsolService -Credential $Credential
+						If ($Null -ne (Get-MsolCompanyInformation -ErrorAction SilentlyContinue))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: MSOnline"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - MSOnline"
+							}
+						}
 					}
 				}
 				continue
@@ -209,6 +281,17 @@ function Connect-Office365
 						
 						Write-Verbose "Connecting to Security and Compliance Center"
 						Connect-IPPSSession
+						If ($Null -ne (Get-PSSession | Where-Object { $_.ConfigurationName -like "*Exchange*" }))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Security and Compliance Center"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Security and Compliance Center"
+							}
+						}
 					}
 				}
 				Else
@@ -223,6 +306,17 @@ function Connect-Office365
 					$Session = New-PSSession @newPSSessionSplat
 					Write-Verbose "Connecting to SecurityAndCompliance"
 					Import-PSSession $Session -DisableNameChecking
+					If ($Null -ne (Get-PSSession | Where-Object { $_.ConfigurationName -like "*Exchange*" }))
+					{
+						If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+						{
+							$host.ui.RawUI.WindowTitle += " - Connected To: Security and Compliance Center"
+						}
+						Else
+						{
+							$host.ui.RawUI.WindowTitle += " - Security and Compliance Center"
+						}
+					}
 				}
 				continue
 			}
@@ -245,17 +339,40 @@ function Connect-Office365
 					Write-Verbose "Connecting to SharePoint at $SharePointURL"
 					If ($MFA -eq $True)
 					{
-						Connect-SPOService -Url $SharePointURL
+						$SPOSession = Connect-SPOService -Url $SharePointURL
+						If ($Null -ne (Get-SPOTenant))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: SharePoint Online"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - SharePoint Online"
+							}
+						}
 					}
 					Else
 					{
-						Connect-SPOService -Url $SharePointURL -Credential $Credential
+						$SPOSession = Connect-SPOService -Url $SharePointURL -Credential $Credential
+						If ($Null -ne (Get-SPOTenant))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: SharePoint Online"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - SharePoint Online"
+							}
+						}
 					}
 				}
 				continue
 			}
 			
 			SkypeForBusiness {
+				Write-Verbose "Connecting to SkypeForBusiness"
 				If ($null -eq (Get-Module @getModuleSplat -Name "SkypeOnlineConnector"))
 				{
 					Write-Error "SkypeOnlineConnector Module is not present!"
@@ -268,13 +385,34 @@ function Connect-Office365
 					{
 						$CSSession = New-CsOnlineSession
 						Import-PSSession $CSSession -AllowClobber
+						If ($Null -ne (Get-CsOnlineDirectoryTenant))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Skype for Business"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Skype for Business"
+							}
+						}
 					}
 					Else
 					{
 						$CSSession = New-CsOnlineSession -Credential $Credential
+						Import-PSSession $CSSession -AllowClobber
+						If ($Null -ne (Get-CsOnlineDirectoryTenant))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Skype for Business"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Skype for Business"
+							}
+						}
 					}
-					Write-Verbose "Connecting to SkypeForBusiness"
-					Import-PSSession $CSSession -AllowClobber
 				}
 				continue
 			}
@@ -289,11 +427,33 @@ function Connect-Office365
 					Write-Verbose "Connecting to Teams"
 					If ($MFA -eq $True)
 					{
-						Connect-MicrosoftTeams
+						$TeamsConnect = Connect-MicrosoftTeams
+						If ($Null -ne ($TeamsConnect))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Microsoft Teams"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Microsoft Teams"
+							}
+						}
 					}
 					Else
 					{
-						Connect-MicrosoftTeams -Credential $Credential
+						$TeamsConnect = Connect-MicrosoftTeams -Credential $Credential
+						If ($Null -ne ($TeamsConnect))
+						{
+							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
+							{
+								$host.ui.RawUI.WindowTitle += " - Connected To: Microsoft Teams"
+							}
+							Else
+							{
+								$host.ui.RawUI.WindowTitle += " - Microsoft Teams"
+							}
+						}
 					}
 				}
 				continue
