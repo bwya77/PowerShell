@@ -5,16 +5,18 @@ function Connect-Office365
 		===========================================================================
 		Created on:   	2/4/2019 10:42 PM
 		Created by:   	Bradley Wyatt
-		E-Mail:		Brad@TheLazyAdministrator.com
-		GitHub:		https://github.com/bwya77
-		Website:	https://www.thelazyadministrator.com
+		E-Mail:			Brad@TheLazyAdministrator.com
+		GitHub:			https://github.com/bwya77
+		Website:		https://www.thelazyadministrator.com
 		Organization: 	Porcaro Stolarek Mete Partners; The Lazy Administrator
 		Filename:     	Connect-Office365.ps1
-		Version: 	1.0.4
+		Version: 		1.0.5
 	
 		Contributors:   /u/Sheppard_Ra
 	
 		Changelog:
+			1.0.5
+				- Updated comment based help
 			1.0.4
 				- Host title will add a service or services you are connected to. If unable to connect it will not display connection status until connection is valid
 		===========================================================================
@@ -28,28 +30,8 @@ function Connect-Office365
     .PARAMETER MFA
 		Description: Specifies MFA requirement to sign into Office 365 services. If set to $True it will use the Office 365 ExoPSSession Module to sign into Exchange & Compliance Center using MFA. Other modules support MFA without needing another external module
 
-    .PARAMETER Exchange
-		Description: Connect to Exchange Online
-
-    .PARAMETER SkypeForBusiness
-		Description: Connect to Skype for Business
-
-    .PARAMETER SharePoint
-		Description: Connect to SharePoint Online
-
-	.PARAMETER SecurityandCompliance
-		Description: Connect to Security and Compliance Center
-
-	.PARAMETER AzureAD
-		Description: Connect to Azure AD V2
-
-	.PARAMETER MSOnline
-		Type: Switch
-		Description: Connect to Azure AD V1
-
-	.PARAMETER Teams
-		Type: Switch
-		Description: Connect to Teams
+    .PARAMETER Service
+		Description: Specify service to connect to (Exchange, AzureAD, MSOnline, Teams, SecurityandCompliance, SharePoint, SkypeForBusiness)
 
     .EXAMPLE
 		Description: Connect to SharePoint Online
@@ -110,7 +92,7 @@ function Connect-Office365
 			AzureAD {
 				If ($null -eq (Get-Module @getModuleSplat -Name "AzureAD"))
 				{
-					Write-Error "AzureAD Module is not present!"
+					Write-Error "SkypeOnlineConnector Module is not present!"
 					continue
 				}
 				Else
