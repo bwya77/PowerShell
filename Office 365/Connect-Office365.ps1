@@ -92,7 +92,7 @@ function Connect-Office365
 			AzureAD {
 				If ($null -eq (Get-Module @getModuleSplat -Name "AzureAD"))
 				{
-					Write-Error "SkypeOnlineConnector Module is not present!"
+					Write-Error "AzureAD Module is not present!"
 					continue
 				}
 				Else
