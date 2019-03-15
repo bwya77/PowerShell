@@ -100,7 +100,7 @@ function Connect-Office365
 					If ($MFA -eq $True)
 					{
 						$Connect = Connect-AzureAD
-						If ($Connect -ne $Null)
+						If ($null -ne $Connect)
 						{
 							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
 							{
@@ -116,7 +116,7 @@ function Connect-Office365
 					Else
 					{
 						$Connect = Connect-AzureAD -Credential $Credential
-						If ($Connect -ne $Null)
+						If ($Null -ne $Connect)
 						{
 							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
 							{
@@ -321,7 +321,7 @@ function Connect-Office365
 					Write-Verbose "Connecting to SharePoint at $SharePointURL"
 					If ($MFA -eq $True)
 					{
-						$SPOSession = Connect-SPOService -Url $SharePointURL
+						Connect-SPOService -Url $SharePointURL
 						If ($Null -ne (Get-SPOTenant))
 						{
 							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
@@ -336,7 +336,7 @@ function Connect-Office365
 					}
 					Else
 					{
-						$SPOSession = Connect-SPOService -Url $SharePointURL -Credential $Credential
+						Connect-SPOService -Url $SharePointURL -Credential $Credential
 						If ($Null -ne (Get-SPOTenant))
 						{
 							If (($host.ui.RawUI.WindowTitle) -notlike "*Connected To:*")
