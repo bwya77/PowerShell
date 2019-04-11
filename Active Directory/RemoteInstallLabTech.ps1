@@ -1,4 +1,4 @@
-#Local files to transfer over so it will run locally
+﻿#Local files to transfer over so it will run locally
 $FiletoTransfer = "C:\transfer\LabTech_Install.msi"
 
 #I want to have some basic logging because it will run unattended 
