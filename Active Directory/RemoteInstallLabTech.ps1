@@ -150,7 +150,7 @@ Do
 		Get-PSSession | Remove-PSSession -ErrorAction SilentlyContinue
 	}
 }
-#Run the script until we hit all of the computers
+#Run the script until we install agent on all of the computers
 Until ($ComputerWork -eq $ComputerCount)
 # Get End Time
 $endDTM = (Get-Date)
