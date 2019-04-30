@@ -1,4 +1,5 @@
 ﻿#Local files to transfer over so it will run locally
+#If you change the msi file, change lines 87, 95
 $FiletoTransfer = "C:\transfer\LabTech_Install.msi"
 
 #I want to have some basic logging because it will run unattended 
@@ -17,15 +18,12 @@ Else
 
 #Parse computers from Active Directory
 $Computers = (Get-ADComputer -Filter * -SearchBase "OU=Machines,OU=Chicago,DC=BWYA77,DC=COM").Name
-#Manually enter in computers
-#$Computers = "IT4046", "IT4051"
-#$Computers = "it3598", "IT3661", "IT3667", "IT3813", "IT4033", "IT4051"
 
-[int]$CounterNotAbleToConnect = 0
-[int]$Computerpathfound = 0
+#Manually enter in computers
+#$Computers = "IT40", "IT45"
+
 [int]$computerwork = 0
-[int]$ComputerFailed = 0
-[int]$NoPSSession = 0
+
 
 #Counts the number of computers it will have to hit, this tells the script when to stop once it hits this number of computers
 $ComputerCount = ($Computers).count
@@ -37,6 +35,11 @@ Do
 {
 	ForEach ($Computer in $Computers)
 	{
+		[int]$Retry = 0
+		[int]$InstallCode = 0
+		[int]$RetryCopyFile = 0
+		[int]$CopyCode = 0
+		
 		#Test WinRM, if this fails we can't do shit
 		Write-Host "Testing WSMAN Connection to $Computer" -ForegroundColor Yellow -BackgroundColor Blue
 		$Heartbeat = (Test-WSMan -ComputerName $Computer -ErrorAction SilentlyContinue)
@@ -44,7 +47,6 @@ Do
 		{
 			"WinRM appears to be off for $Computer" | Out-File $LogFile\log.txt -Append -Force
 			Write-Host "$Computer is not able to be connected to via WinRM" -ForegroundColor Red
-			$CounterNotAbleToConnect++
 
 		}
 		Else
@@ -58,7 +60,7 @@ Do
 			If ($null -ne $Session)
 			{
 				Write-Host "Creating a new PSDrive on $Computer" -ForegroundColor Yellow
-				Invoke-Command -Session $session -ScriptBlock { New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR }
+				Invoke-Command -Session $session -ScriptBlock { New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR } | Out-Null
 				
 				Write-Host "Checking to see if LabTech is installed" -ForegroundColor Yellow
 				$Check = Invoke-Command -Session $session -ScriptBlock { (Get-ChildItem "HKCR:\Installer\Products") | Where-Object { $_.GetValue("ProductName") -like "*LabTech*" } }
@@ -67,7 +69,6 @@ Do
 					Write-Host "$Computer has LabTech Installed!" -ForegroundColor Yellow
 					"$Computer already had it installed" | Out-File $LogFile\log.txt -Append -Force
 					#incriments to keep track of the amount of computers that have it installed already 
-					$ComputerPathFound++
 				}
 				Else
 				{
@@ -76,51 +77,72 @@ Do
 					#Creates a directory on the remote machine 
 					Invoke-Command -Session $session -ScriptBlock { New-Item -ItemType Directory "C:\Transfer" -ErrorAction SilentlyContinue } | Out-Null
 					Write-Host "Done!" -ForegroundColor White
-					
-					Write-Host "Copying over the Windows Agent File to $Computer..." -ForegroundColor Yellow
-					#Copys over the file to our new directory we created above
-					
-					Copy-Item -Path $FiletoTransfer -Destination "\\$computer\C$\Transfer\" -Force -ErrorAction Continue
-					Write-Host "Done!" -ForegroundColor White
-					
-					$CheckforFile = Invoke-Command -Session $session -ScriptBlock { Test-Path -Path C:\transfer\LabTech_Install.msi }
-					If ($CheckforFile -eq $True)
+					Do
 					{
-						"Installing LabTech on $Computer" | Out-File $LogFile\log.txt -Append -Force
-						Write-Host "Installing the agent on $Computer..." -ForegroundColor Yellow
-						Invoke-Command -Session $session -ScriptBlock { Start-Process "msiexec.exe" -ArgumentList "/i C:\transfer\LabTech_Install.msi /q" -Wait }
+						Write-Host "Copying over the Windows Agent File to $Computer..." -ForegroundColor Yellow
+						#Copys over the file to our new directory we created above
+						Copy-Item -Path $FiletoTransfer -Destination "\\$computer\C$\Transfer\" -Force -ErrorAction Continue
+						Write-Host "Done!" -ForegroundColor White
 						
-						Write-Host "Checking to see if LabTech is installed" -ForegroundColor Yellow
-						$Check = Invoke-Command -Session $session -ScriptBlock { (Get-ChildItem "HKCR:\Installer\Products") | Where-Object { $_.GetValue("ProductName") -like "*LabTech*" } }
-						if ($null -ne $Check)
+						$CheckforFile = Invoke-Command -Session $session -ScriptBlock { Test-Path -Path C:\transfer\LabTech_Install.msi }
+						If ($CheckforFile -eq $True)
 						{
-							"LabTech installed on $Computer" | Out-File $LogFile\log.txt -Append -Force
-							Write-Host "$Computer has $LabTech Installed!" -ForegroundColor Green
-							#Adds 1 to the variable to keep track of how many computers don't have the path and will be worked on
-							$ComputerWork++
+							$CopyCode++
+							Do
+							{
+								"Installing LabTech on $Computer" | Out-File $LogFile\log.txt -Append -Force
+								Write-Host "Installing the agent on $Computer..." -ForegroundColor Yellow
+								Invoke-Command -Session $session -ScriptBlock { Start-Process "msiexec.exe" -ArgumentList "/i C:\Transfer\LabTech_Install.msi /q" -Wait }
+								
+								Write-Host "Checking to see if LabTech is installed" -ForegroundColor Yellow
+								$Check = Invoke-Command -Session $session -ScriptBlock { (Get-ChildItem "HKCR:\Installer\Products") | Where-Object { $_.GetValue("ProductName") -like "*LabTech*" } }
+								if ($null -ne $Check)
+								{
+									"LabTech installed on $Computer" | Out-File $LogFile\log.txt -Append -Force
+									Write-Host "$Computer has $LabTech Installed!" -ForegroundColor Green
+									#Adds 1 to the variable to keep track of how many computers don't have the path and will be worked on
+									$ComputerWork++
+									
+									$InstallCode++
+								}
+								Else
+								{
+									$Retry++
+									"Could not install LabTech on $Computer" | Out-File $LogFile\log.txt -Append -Force
+									Write-Host "Install Failed" -ForegroundColor Red
+									#Adds 1 to the variable to keep track of how many computers don't have the path and will be worked on
+									If ($Retry -eq 1)
+									{
+										"Retrying install of LabTech on $Computer" | Out-File $LogFile\log.txt -Append -Force
+										Write-Host "Retrying install of LabTech on $Computer" -ForegroundColor Red
+									}
+								}
+							}
+							Until (($Retry -gt 3) -or ($InstallCode -gt 0))
+							
+							Write-Host "Exiting pssession" -ForegroundColor Yellow
+							Get-PSSession -Name $Session.Name | Remove-PSSession -ErrorAction SilentlyContinue
+							
 						}
 						Else
 						{
-							"Could not install LabTech on $Computer" | Out-File $LogFile\log.txt -Append -Force
-							Write-Host "Install Failed" -ForegroundColor Red
-							#Adds 1 to the variable to keep track of how many computers don't have the path and will be worked on
-							$ComputerFailed++
+							$RetryCopyFile++
+							"Could not copy install files to $Computer" | Out-File $LogFile\log.txt -Append -Force
+							Write-Host "Could not copy install files to $Computer" -ForegroundColor red
+							If ($RetryCopyFile -eq 1)
+							{
+								"Retrying to copy install files to $Computer" | Out-File $LogFile\log.txt -Append -Force
+								Write-Host "Retrying to copy install files to $Computer" -ForegroundColor red
+							}
 						}
-						Write-Host "Exiting pssession" -ForegroundColor Yellow
-						Get-PSSession -Name $Session.Name | Remove-PSSession -ErrorAction SilentlyContinue
 					}
-					Else
-					{
-						"Could not create the proper TRANSFER folder on $Computer" | Out-File $LogFile\log.txt -Append -Force
-						Write-Host "The folder was not created" -ForegroundColor red
-					}
+					Until (($RetryCopyFile -gt 3) -or ($CopyCode -gt 0))
 				}
 			}
 			Else
 			{
 				"Could not establish a PSSession to $Computer" | Out-File $LogFile\log.txt -Append -Force
 				Write-Host "Could not establish a PSSession to $Computer!" -ForegroundColor red
-				$NoPSSession++
 			}
 			
 		}
@@ -134,8 +156,5 @@ Until ($ComputerWork -eq $ComputerCount)
 $endDTM = (Get-Date)
 
 Write-Host "---------STATS----------" -ForegroundColor White
-Write-Host "SCRIPT RUNTIME:$(($endDTM - $startDTM).totalseconds) seconds" -ForegroundColor Green
-Write-Host "COMPUTERS NOT ABLE TO CONNECT: $CounterNotAbleToConnect" -ForegroundColor Green
-Write-Host "COMPUTERS WORKED ON: $computerwork" -ForegroundColor Green
-Write-Host "COMPUTERS FAILED: $ComputerFailed" -ForegroundColor Green
-Write-Host "COMPUTER NOT ABLE TO ESTABLISH SESSION: $NoPSSession" -ForegroundColor Green
+Write-Host "SCRIPT RUNTIME: $(($endDTM - $startDTM).totalseconds) seconds" -ForegroundColor Green
+Write-Host "COMPUTERS INSTALLED SUCESSFULLY: $computerwork" -ForegroundColor Green
