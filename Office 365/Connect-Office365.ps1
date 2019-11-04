@@ -78,10 +78,15 @@ function Connect-Office365
 		Verbose	      = $False
 	}
 	
-	If ($MFA -ne $True)
+	
+
+	If ($MFA -ne $True) 
 	{
 		Write-Verbose "Gathering PSCredentials object for non MFA sign on"
-		$Credential = Get-Credential -Message "Please enter your Office 365 credentials"
+		if (-not $PSBoundParameters.ContainsKey('Credential')) 
+		{
+		    $Credential = Get-Credential -Message "Please enter your Office 365 credentials"
+		}
 	}
 	
 	ForEach ($Item in $PSBoundParameters.Service)
