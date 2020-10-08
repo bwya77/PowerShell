@@ -42,16 +42,16 @@ function Connect-Office365
         C:\PS> Connect-Office365 -Service Exchange, MSOnline
 
     .EXAMPLE
-		Description: Connect to Exchange Online and Azure AD V2 using Multi-Factor Authentication
+		Description: Connect to Exchange Online and Azure AD V1 using Multi-Factor Authentication
         C:\PS> Connect-Office365 -Service Exchange, MSOnline -MFA
 
-	.EXAMPLE
+    .EXAMPLE
 		Description: Connect to Teams and Skype for Business
         C:\PS> Connect-Office365 -Service Teams, SkypeForBusiness
 	
-	.EXAMPLE
+     .EXAMPLE
 		Description: Connect to SharePoint Online
-		 C:\PS> Connect-Office365 -Service SharePoint -SharePointOrganizationName bwya77 -MFA
+	C:\PS> Connect-Office365 -Service SharePoint -SharePointOrganizationName bwya77 -MFA
 
     .LINK
         Online version:  https://www.thelazyadministrator.com/2019/02/05/powershell-function-to-connect-to-all-office-365-services
