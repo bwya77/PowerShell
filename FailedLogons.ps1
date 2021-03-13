@@ -16,8 +16,6 @@ $AccountName = ($AccountName -split '\n')[0]
 $AccountName = $AccountName.trim()
 
 
-
-
 $Reason = $Item.SubString($Item.IndexOf("Failure Reason:"))
 $Reason = $Reason.SubString($Reason.IndexOf("Failure Reason:"))
 $Reason = ($Reason -split ':')[1]
